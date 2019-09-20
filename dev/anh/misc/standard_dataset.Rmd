@@ -1,0 +1,113 @@
+---
+title: "Standard object for dataset"
+author: "Anh N Tran"
+date: 9/20/2019
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+## Standard object for datasets
+
+A standard dataset is a named list of 3: `metadata`, `pdata`, `value`
+
+```{r dataset}
+dataset <- list(metadata = NULL,
+                pdata = NULL,
+                value = NULL)
+```
+
+
+##. `metadata`
+A named list of the following components (unavailable data will be a vector of 1 NA)
+    - `dataset_name`: dataset name, character vector of 1
+    - `geo_series`: GEO series, character vector of 1
+    - `geo_subseries`: GEO subseries, character vector of 1
+    - `geo_platform`: GEO platform, character vector of 1
+    - `data_type`: types of data, character vector of 1
+    - `value_type`: type/unit of value, character vector of 1
+    - `sample_numbers`: number of samples, named numeric vector of 3 (`non_tumor`, `tumor`, `other`)
+    - `clinical_data`: denote of certain clinical data is available, named logical vector of (`age`, `sex`, `grade`, `histology`, `recurrence`, `survival`)
+    - `species`: Latin name for species
+    
+```{r metadata}
+dataset$metadata <- list (dataset_name = "name",
+                          geo_series = "GSExxxxxx",
+                          geo_subseries = "GSExxxxxx",
+                          geo_platform = "GPLxxxxxx",
+                          data_type = "rna",
+                          value_type = "Normalized signal intensity",
+                          sample_numbers = c(non_tumor = 0,
+                                             tumor = 0,
+                                             other = 0),
+                          clinical_data = c(age = FALSE,
+                                            sex = FALSE,
+                                            grade = FALSE,
+                                            histology = FALSE,
+                                            recurrence = FALSE,
+                                            survival = FALSE),
+                          species = "Homo sapiens")
+```
+
+## `pdata`
+Chinical data. A data frame, a sample on each row. First column is sample names.
+
+```{r pdata}
+pdata_example <- data.frame(sample = c("sample_1", "sample_2", "sample_3"),
+                            age = c(41, 42, 43),
+                            grade = c("I", "II", "III"),
+                            recurrence = c("primary", "secondary", NA))
+
+dataset$pdata <- pdata_example
+```
+
+
+## `value`
+Value of expression of each gene for each sample. A data frame, a sample on each row. First column is sample names.
+
+```{r value}
+value_example <- data.frame(sample = c("sample_1", "sample_2", "sample_3"),
+                            GENE1 = c(1, 2, 3),
+                            GENE2 = c(2, NA, 3),
+                            GENE3 = c(1, 1, 2))
+
+dataset$value <- value_example
+```
+
+```{r}
+summary(dataset)
+
+#          Length Class      Mode
+# metadata 9      -none-     list
+# pdata    4      data.frame list
+# value    4      data.frame list
+
+str(dataset)
+
+# List of 3
+#  $ metadata:List of 9
+#   ..$ dataset_name  : chr "name"
+#   ..$ geo_series    : chr "GSExxxxxx"
+#   ..$ geo_subseries : chr "GSExxxxxx"
+#   ..$ geo_platform  : chr "GPLxxxxxx"
+#   ..$ data_type     : chr "rna"
+#   ..$ value_type    : chr "Normalized signal intensity"
+#   ..$ sample_numbers: Named num [1:3] 0 0 0
+#   .. ..- attr(*, "names")= chr [1:3] "non_tumor" "tumor" "other"
+#   ..$ clinical_data : Named logi [1:6] FALSE FALSE FALSE FALSE FALSE FALSE
+#   .. ..- attr(*, "names")= chr [1:6] "age" "sex" "grade" "histology" ...
+#   ..$ species       : chr "Homo sapiens"
+#  $ pdata   :'data.frame':	3 obs. of  4 variables:
+#   ..$ sample    : Factor w/ 3 levels "sample_1","sample_2",..: 1 2 3
+#   ..$ age       : num [1:3] 41 42 43
+#   ..$ grade     : Factor w/ 3 levels "I","II","III": 1 2 3
+#   ..$ recurrence: Factor w/ 2 levels "primary","secondary": 1 2 NA
+#  $ value   :'data.frame':	3 obs. of  4 variables:
+#   ..$ sample: Factor w/ 3 levels "sample_1","sample_2",..: 1 2 3
+#   ..$ GENE1 : num [1:3] 1 2 3
+#   ..$ GENE2 : num [1:3] 2 NA 3
+#   ..$ GENE3 : num [1:3] 1 1 2
+```
+
