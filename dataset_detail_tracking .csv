@@ -1,0 +1,22 @@
+rmd prepped,,Dataset,Series,Subseries,platform,data type,VALUE,non_tumor_number,tumor_number,other_number,clinical_data,age,sex,grade,type,histology,mib-1 index,primary/recurrence,radiation,mutation subtype,survival,species,note
+no,,,GSE108089,,GPL570,DNA?,,,,,0,,,,,,,,,,,Homo sapiens,
+yes - incomplete,no deature data -incomplete,Vasudevan_H,GSE101638,,GPL16791	,RNA,,,,,0,,,,,,,,,,,Homo sapiens,
+yes - incomplete,no feature data - incomplete,Miller_A,GSE95048,,GPL20988,RNA,,,,,1,,,,,,,,,,,Canis lupus familiaris,
+no,,,GSE83933,,,methylation,,,,,1,,,,,,,,,,,Homo sapiens,
+yes,GB_ACC - appears to be transcripts - can we match to a known list? ,Dalan_A,GSE88721,GSE88720,GPL17692,RNA,Log2 RMA signal,1,14,,1,1,1,,,,,,,,,Homo sapiens,problematic gene names
+yes - incomplete,couldn't extract data,Harmancı_A,GSE91376,,GPL11154,"CHIP-seq, methylation",,,,,1,,,,,,,,,,,Homo sapiens,
+yes,,Clark_V_2016,GSE85135,GSE85133,GPL16791,RNA,,,,,1,,,,,,,,,,,Homo sapiens,"available as fpkm_tracking, which need to be manually downloaded"
+yes,,Srivastava_S,GSE83507,,GPL22059,proteome,,,,,1,,,,,,,,,,,Homo sapiens,
+yes,,Schulten_H,GSE77259,,GPL6244,RNA,,,,,1,,,,,,,,,,,Homo sapiens,
+yes,need to split grading and recurrence/ clean,Schmidt M,GSE74385,,GSE74385,RNA," 	qspline normalized, median-centered log2 values",0,62,0,1,,,1,,,,1,,,,Homo sapiens,need further cleaning
+yes,"this is miRNA in CSF, I don't think it's relevant",Drusco_A,GSE62381,,,miRNA,,,,,0,,,,,,,,,,,Homo sapiens,
+yes,needs cleaning - grading variable mixed,Torres-Martin_M,GSE54934,,GPL6244 	,RNA,log2 RMA,3,22,45,1,,,1,,,,,,,,Homo sapiens,need further cleaning
+yes,miRNA -  max sd,Ludwig_N,GSE50641,,GPL16770,miRNA,Non normalized raw intensity values for 1205 miRNAs in each of the 55 samples,0,55,0,1,1,1,1,,1,,,,,,Homo sapiens,
+yes,,Clark_V,GSE58037,,GPL10558,RNA,background corrected and quantile normalized,0,114,0,1,,,1,,,,1,1,1,,Homo sapiens,
+yes,arachnoid in grading?,Yeh T,GSE55609,,GPL570,RNA,Normalized signal intensity,0,24,0,1,,,1,,,,,,,,Homo sapiens,
+yes - incomplete,,Tabanero O,GSE42624,,,DNA,,,,,1,,,,,,,,,,,Homo sapiens,
+yes,,D'Urso O,GSE16181,,GPL8557,RNA,,0,252,0,1,1,1,1,1,1,1,,,,1,Homo sapiens,
+yes,,Lee Y,GSE16584,GSE16581,GPL570,RNA,,0,68,0,1,1,1,1,,,,,,,1,Homo sapiens,
+yes,max sd,Keller A,GSE12530,,GPL2895,RNA,Normalized signal intensity,2,24,0,1,1,1,1,,1,,,,,,Homo sapiens,
+yes,,Claus E,GSE9438,,GPL570,,mRNA to cDNA,,,,,,,,,,,,,,,Homo sapiens,
+yes,grade only,Scheck AC,GSE4780,,GPL570,RNA,,,,,0,,,,,,,,,,,Homo sapiens,
