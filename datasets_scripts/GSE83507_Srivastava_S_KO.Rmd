@@ -1,0 +1,105 @@
+---
+title: "GSE83507"
+author: "Kaitlyn O'Shea"
+date: "10/1/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = FALSE)
+```
+
+```{r install_packages, eval = FALSE}
+## require BioManager
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("GEOquery") 
+```
+
+```{r libraries, message=FALSE, warning=FALSE}
+## libraries needed
+library("tidyverse")
+library("GEOquery")
+```
+
+## Get GSE83507 from GEO
+```{r Geo_download, message=FALSE, warning=FALSE}
+## Download dataset from GEO, save downloaded files in the same folder as this .Rmd file.
+dir.create(file.path("raw","gse83507"), recursive = TRUE)
+gse83507 <- getGEO("gse83507",  # sample accession 
+                   destdir = file.path("raw","gse83507"),
+                   GSEMatrix = TRUE,
+                   AnnotGPL = TRUE)
+```
+
+## Clinical Data from Dataset
+```{r ClinicalDataExtract}
+## index into data list and extract clinical data
+gse83507_pheno <-
+                  gse83507[[1]] %>%           # index into list 
+                  phenoData() %>%             # select phenoData
+                  pData() %>%                 # apply pData
+                  as_tibble() %>%             # tidy friendly
+                  select("geo_accession" = geo_accession,
+                         "sample_id" = title, # do we need sample name and accession number?
+                         "age" = `age:ch1`,       
+                         "sex" = `Sex:ch1`
+                        ) 
+```
+
+## Expression Data from Dataset
+```{r ExpressionDataExtract}
+## index into data list and extract expression table.
+gse83507_exprs <- 
+                  gse83507[[1]] %>%   # index into list 
+                  exprs() %>%         # select expression data
+                  as_tibble()         # tidy friendly
+
+## index into data list and extract gene feature data
+gse83507_feature <- 
+                  gse83507[[1]] %>%  # index into list 
+                  fData() %>%        # select feature data
+                  as_tibble()        # tidy friendly
+```
+
+## Transform Expression Data
+``` {r ExpressionDataTransform}
+# function to find standard deviation of each probe across all tumors
+rowsd <- function(x) {
+                      sqrt(
+                        rowSums((x - rowMeans(x))^2)/
+                          (dim(x)[2] - 1)
+                        )
+}
+
+## keep only the probe with greatest variability across tumors as rna variable and gene names
+gse83507_protein <-
+               bind_cols(gse83507_feature["GB_ACC"], gse83507_exprs) %>% # add transcript_id name to expression data
+               rename("transcript_id" = "GB_ACC") %>%                    # rename name variable as 'transcript_id' 
+               filter(transcript_id != "") %>%                           # keep only data for named transcript_ids
+               pivot_longer(-transcript_id,                              # do not group by transcript_id 
+                            names_to = "geo_accession",                  # 'key' via gather
+                            values_to = "value") %>%                     
+               pivot_wider(names_from = "transcript_id",                 # final format transcript_ids as rows
+                            values_from = "value")                       # final format expression across accession as columns  
+```
+
+## Dataset for Analysis
+```{r FinalDataset}
+## combine phenotype and expression data for workable data
+gse83507_data <- inner_join(gse83507_pheno, gse83507_protein, 
+                            by = "geo_accession")          # match by accession
+
+## create metatag for dataset
+gse83507_info <-  
+                list(
+                     name = "Srivastava_S",              # author
+                     accession = "GSE83507"                # dataset accession 
+                     )
+
+## create dataset as list 
+Srivastava_S <- list(
+                        dataset_info = gse83507_info,      # metatag
+                        data = gse83507_data)              # workable data
+```

@@ -1,0 +1,115 @@
+---
+title: "GSE91376"
+author: "Kaitlyn O'Shea"
+date: "10/1/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = FALSE)
+```
+
+```{r install_packages, eval = FALSE}
+## require BioManager
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("GEOquery") 
+```
+
+```{r libraries, message=FALSE, warning=FALSE}
+## libraries needed
+library("tidyverse")
+library("GEOquery")
+```
+
+## Get GSE77259 from GEO
+```{r Geo_download, message=FALSE, warning=FALSE}
+## Download dataset from GEO, save downloaded files in the same folder as this .Rmd file.
+dir.create(file.path("raw","gse77259"), recursive = TRUE)
+gse77259 <- getGEO("gse77259",  # sample accession 
+                   destdir = file.path("raw","gse77259"),
+                   GSEMatrix = TRUE,
+                   AnnotGPL = TRUE)
+```
+
+## Clinical Data from Dataset
+```{r ClinicalDataExtract}
+## index into data list and extract clinical data
+gse77259_pheno <-
+                  gse77259[[1]] %>%           # index into list 
+                  phenoData() %>%             # select phenoData
+                  pData() %>%                 # apply pData
+                  as_tibble() %>%             # tidy friendly
+                  select("geo_accession" = geo_accession,
+                         "sample_id" = title, # do we need sample name and accession number?
+                         "age" = `age:ch1`,       
+                         "sex" = `gender:ch1`,         
+                         "grade" = `tumor grade:ch1`,         
+                         "histology" =  `histology:ch1`,   
+                         "location" = `tumor location:ch1`      
+                        ) 
+```
+
+## Expression Data from Dataset
+```{r ExpressionDataExtract}
+## index into data list and extract expression table.
+gse77259_exprs <- 
+                  gse77259[[1]] %>%   # index into list 
+                  exprs() %>%         # select expression data
+                  as_tibble()         # tidy friendly
+
+## index into data list and extract gene feature data
+gse77259_feature <- 
+                  gse77259[[1]] %>%  # index into list 
+                  fData() %>%        # select feature data
+                  as_tibble()        # tidy friendly
+```
+
+## Transform Expression Data
+``` {r ExpressionDataTransform}
+# function to find standard deviation of each probe across all tumors
+rowsd <- function(x) {
+                      sqrt(
+                        rowSums((x - rowMeans(x))^2)/
+                          (dim(x)[2] - 1)
+                        )
+}
+
+## keep only the probe with greatest variability across tumors as rna variable and gene names
+gse77259_rna <-
+               bind_cols(gse77259_feature["Gene symbol"], gse77259_exprs) %>% # add gene name to expression data
+               rename("gene" = "Gene symbol") %>%                             # rename name variable as 'gene' 
+               filter(gene != "") %>%                                         # keep only data for named genes
+               mutate(sd = rowsd(.[,-1])) %>%                                 # calculate sd for each probe, index out gene name
+               group_by(gene) %>%                                             # group probes by gene
+               filter(sd == max(sd)) %>%                                      # keep the probe with the max variation for each gene
+               filter(row_number() == 1) %>%                                  # remove duplicates
+               ungroup() %>%                                                  # ungroup by genes 
+               select(-sd) %>%                                                # select all but sd column
+               pivot_longer(-gene,                                            # do not group by gene 
+                            names_to = "geo_accession",                       # 'key' via gather
+                            values_to = "value") %>%                          
+               pivot_wider(names_from = "gene",                               # final format genes as rows
+                            values_from = "value")                            # final format expression across accession as columns    
+
+```
+
+## Dataset for Analysis
+```{r FinalDataset}
+## combine phenotype and expression data for workable data
+gse77259_data <- inner_join(gse77259_pheno, gse77259_rna, 
+                            by = "geo_accession")          # match by accession
+
+## create metatag for dataset
+gse77259_info <-  
+                list(
+                     name = "Schulten_H",              # author
+                     accession = "GSE77259"                # dataset accession 
+                     )
+
+## create dataset as list 
+Schulten_H <- list(
+                        dataset_info = gse77259_info,      # metatag
+                        data = gse77259_data)              # workable data
+```

@@ -1,0 +1,103 @@
+---
+title: "GSE16156_DUrso_O_KO"
+author: "Kaitlyn O'Shea"
+date: "9/28/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = FALSE)
+```
+
+```{r install_packages, eval = FALSE}
+## require BioManager
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("GEOquery") 
+```
+
+```{r libraries, message=FALSE, warning=FALSE}
+## libraries needed
+library("tidyverse")
+library("GEOquery")
+```
+
+## Get GSE16156 from GEO
+```{r Geo_download, message=FALSE, warning=FALSE}
+## Download dataset from GEO, save downloaded files in the same folder as this .Rmd file.
+dir.create(file.path("raw","gse16156"), recursive = TRUE)
+gse16156 <- getGEO("gse16156",  # sample accession 
+                   destdir = file.path("raw","gse16156"),
+                   GSEMatrix = TRUE,
+                   AnnotGPL = TRUE)
+```
+
+## Clinical Data from Dataset
+```{r ClinicalDataExtract}
+## index into data list and extract clinical data
+gse16156_pheno <-
+                  gse16156[[1]] %>%           # index into list 
+                  phenoData() %>%             # select phenoData
+                  pData() %>%                 # apply pData
+                  as_tibble() %>%             # tidy friendly
+                  select("geo_accession" = geo_accession,
+                         "sample_id" = title, # do we need sample name and accession number?
+                         "age" = `age:ch1`,
+                         "sex" = `sex:ch1`,
+                         "grade" = `grade:ch1`,
+                         "type" = `type:ch1`,
+                         "location" = `location:ch1`,
+                         "mib1_index" = `mib-1 labeling indices:ch1`,
+                         "recurrence_yrs" = `recurrence (years):ch1`,
+                         "survival_yrs" = `survival (years):ch1`
+                         ) 
+```
+
+## Expression Data from Dataset
+```{r ExpressionDataExtract}
+## index into data list and extract expression table.
+gse16156_exprs <- 
+                  gse16156[[1]] %>%   # index into list 
+                  exprs() %>%         # select expression data
+                  as_tibble()         # tidy friendly
+
+## index into data list and extract gene feature data
+gse16156_feature <- 
+                  gse16156[[1]] %>%  # index into list 
+                  fData() %>%        # select feature data
+                  as_tibble()        # tidy friendly
+```
+
+## Transform Expression Data
+``` {r ExpressionDataTransform}
+## keep only named genes 
+gse16156_rna <-
+               bind_cols(gse16156_feature["GeneName"], gse16156_exprs) %>%    # add gene name to expression data
+               rename("gene" = "GeneName") %>%                                # rename name variable as 'gene' 
+               filter(gene != "") %>%                                         # keep only data for named genes
+               pivot_longer(-gene,                                            # do not group by gene 
+                            names_to = "geo_accession",                       # 'key' via gather
+                            values_to = "value") %>%                          
+               pivot_wider(names_from = "gene",                               # final format genes as rows
+                            values_from = "value")                            # final format expression across accession as columns    
+```
+
+## Dataset for Analysis
+```{r FinalDataset}
+## combine phenotype and expression data for workable data
+gse16156_data <- inner_join(gse16156_pheno, gse16156_rna, 
+                            by = "geo_accession")          # match by accession
+
+## create metatag for dataset
+gse16156_info <-  
+                list(
+                     name = "DUrso_O",                      # author
+                     accession = "GSE16156"                # dataset accession 
+                     )
+
+## create dataset as list 
+DUrso_O <- list(
+                 dataset_info = gse16156_info,             # metatag
+                 data = gse16156_data)                     # workable data
+```
