@@ -36,29 +36,38 @@ gse95048 <- getGEO("gse95048",  # sample accession
 ## Clinical Data from Dataset
 ```{r ClinicalDataExtract}
 ## index into data list and extract clinical data
-gse95048_pheno <-
-                  gse95048[[1]] %>%           # index into list 
-                  phenoData() %>%             # select phenoData
-                  pData() %>%                 # apply pData
-                  as_tibble() %>%             # tidy friendly
-                  select("geo_accession" = geo_accession,
-                         "sample_id" = title, # do we need sample name and accession number?
-                         "grade" = `tumor grade:ch1`,
-                         "type" = `tumor subtype:ch1` # this is a mixed variable between grade and histology
-                         ) 
-```
+gse95048_cd <-
+               gse95048[["GSE95048_series_matrix.txt.gz"]] %>%  # index into list 
+               phenoData() %>%                                  # select phenoData
+               pData() %>%                                      # apply pData
+               as_tibble() %>%                                  # tidy friendly
+               select("geo_accession" = geo_accession,
+                      "sample_id" = title,                      
+                      "grade" = `tumor grade:ch1`,
+                      "type" = `tumor subtype:ch1`              
+                      ) 
+
+gse95048_pheno <- gse95048_cd %>%
+                    mutate(
+                    "grade" = factor(grade, 
+                                     levels = c("I", "II", "III", "none"), 
+                                     labels = c("I", "II", "III", "benign")
+                                     )    
+                    ) %>%
+                    mutate_if(is.character, as.factor)
+```                         
 
 ## Expression Data from Dataset
 ```{r ExpressionDataExtract}
 ## index into data list and extract expression table.
 gse95048_exprs <- 
-                  gse95048[[1]] %>%   # index into list 
+                  gse95048[["GSE95048_series_matrix.txt.gz"]] %>%   # index into list 
                   exprs() %>%         # select expression data
                   as_tibble()         # tidy friendly
 
 ## index into data list and extract gene feature data
 gse95048_feature <- 
-                  gse95048[[1]] %>%  # index into list 
+                  gse95048[["GSE95048_series_matrix.txt.gz"]] %>%  # index into list 
                   fData() %>%        # select feature data
                   as_tibble()        # tidy friendly
 ```
@@ -74,39 +83,66 @@ rowsd <- function(x) {
 }
 
 ## keep only the probe with greatest variability across tumors as rna variable and gene names
-gse95048_rna <-
-               bind_cols(gse95048_feature["Gene symbol"], gse95048_exprs) %>% # add gene name to expression data
-               rename("gene" = "Gene symbol") %>%                             # rename name variable as 'gene' 
-               filter(gene != "") %>%                                         # keep only data for named genes
-               mutate(sd = rowsd(.[,-1])) %>%                                 # calculate sd for each probe, index out gene name
-               group_by(gene) %>%                                             # group probes by gene
-               filter(sd == max(sd)) %>%                                      # keep the probe with the max variation for each gene
-               filter(row_number() == 1) %>%                                  # remove duplicates
-               ungroup() %>%                                                  # ungroup by genes 
-               select(-sd) %>%                                                # select all but sd column
-               pivot_longer(-gene,                                            # do not group by gene 
-                            names_to = "geo_accession",                       # 'key' via gather
-                            values_to = "value") %>%                          
-               pivot_wider(names_from = "gene",                               # final format genes as rows
-                            values_from = "value")                            # final format expression across accession as columns    
-
+gse95048_rna <- data.frame()
+  #            bind_cols(gse95048_feature["Gene symbol"], gse95048_exprs) %>% # add gene name to expression data
+  #            rename("gene" = "Gene symbol") %>%                             # rename name variable as 'gene' 
+  #            filter(gene != "") %>%                                         # keep only data for named genes
+  #            mutate(sd = rowsd(.[ , -1])) %>%                               # calculate sd for each probe, index out gene name
+  #            group_by(gene) %>%                                             # group probes by gene
+  #            filter(sd == max(sd)) %>%                                      # keep the probe with the max variation for each gene
+  #            ungroup() %>%                                                  # ungroup by genes 
+  #            select(-sd) %>%                                                # select all but sd column
+  #            pivot_longer(-gene,                                            # do not group by gene 
+  #                         names_to = "geo_accession",                       # 'key' via gather
+  #                         values_to = "value") %>%
+  #            mutate("logvalue" = log2(value)) %>%                           # log2 transform expression for variance stabilization 
+  #            group_by(gene) %>%                                             # standardize for cross data set comparison
+  #            mutate("standardized" = (logvalue - mean(logvalue))/           # center at mean for gene 
+  #                                     sd(logvalue),                         # scale by sd for gene
+  #                   ) %>%
+  #            ungroup() %>%                                                  # ungroup by genes 
+  #            select(-value, -logvalue) %>%                                  # select all but sd column
+  #            pivot_wider(names_from = "gene",                               # final format genes as rows
+  #                        values_from = "standardized")                      # final format expression across accession as columns                
 ```
 
 ## Dataset for Analysis
 ```{r FinalDataset}
 ## combine phenotype and expression data for workable data
-gse95048_data <- inner_join(gse95048_pheno, gse95048_rna, 
-                            by = "geo_accession")          # match by accession
+# gse95048_data <- inner_join(gse95048_pheno, gse95048_rna, 
+#                            by = "geo_accession")          # match by accession
 
 ## create metatag for dataset
 gse95048_info <-  
                 list(
                      name = "Miller_A",              # author
-                     accession = "GSE95048"                # dataset accession 
+                     accession = "GSE95048" ,        # dataset accession
+                     sample_id = "sample_id" %in% colnames(gse95048_pheno)[-c(1,2)],   
+                     age = "age" %in% colnames(gse95048_pheno)[-c(1,2)],       
+                     sex = "sex" %in% colnames(gse95048_pheno)[-c(1,2)],             
+                     grade = "grade" %in% colnames(gse95048_pheno)[-c(1,2)],           
+                     histology = "histology" %in% colnames(gse95048_pheno)[-c(1,2)],       
+                     type = "type" %in% colnames(gse95048_pheno)[-c(1,2)],       
+                     location = "location" %in% colnames(gse95048_pheno)[-c(1,2)],       
+                     mib1_index = "mib1_index" %in% colnames(gse95048_pheno)[-c(1,2)],    
+                     recurrence = "recurrence" %in% colnames(gse95048_pheno)[-c(1,2)],    
+                     recurrence_yrs = "recurrence_yrs" %in% colnames(gse95048_pheno)[-c(1,2)],    
+                     recurrence_freq = "recurrence_freq" %in% colnames(gse95048_pheno)[-c(1,2)],  
+                     survival_days = "survival_days" %in% colnames(gse95048_pheno)[-c(1,2)], 
+                     survival_yrs = "survival_yrs" %in% colnames(gse95048_pheno)[-c(1,2)],     
+                     disease = "disease" %in% colnames(gse95048_pheno)[-c(1,2)],
+                     radiation = "radiation" %in% colnames(gse95048_pheno)[-c(1,2)],       
+                     rna_integrity ="rna_integrity" %in% colnames(gse95048_pheno)[-c(1,2)],
+                     
+                     sample_numbers = nrow(gse95048_pheno) # number of samples  
                      )
 
 ## create dataset as list 
 Miller_A <- list(
-                        dataset_info = gse95048_info,      # metatag
-                        data = gse95048_data)              # workable data
+                 dataset_info = gse95048_info,      # metatag
+                 clinical_data = gse95048_pheno,           # clinical data
+                 expression_data = gse95048_rna,           # expression data
+                 #data = gse95048_data,                     # combined, workable data
+                 full_GEO = gse95048                       # full original download from GEO
+                 )
 ```

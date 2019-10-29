@@ -1,0 +1,56 @@
+---
+title: "Table One"
+author: "Kaitlyn O'Shea"
+date: "10/29/2019"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(knitr)
+```
+
+
+```{r}
+load("~/Documents/Thesis/mgm_eda/datasets/GSE85135_Clark_V_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE58037_Clark_V_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE77259_Schulten_H_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE74385_Schmidt_M_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE54934_Torres-Martin_M_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE55609_Yeh_T_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE16156_DUrso_O_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE16581_Lee_Y_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE12530_Keller_A_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE9438_Claus_E_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE4780_Scheck_A_KO.Rda")
+
+```
+
+
+
+```{r}
+meningioma_datasets <- bind_rows(
+                      Clark_V[["clinical_data"]]        %>% mutate(data_name = "GSE58037") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Clark_V_2016[["clinical_data"]]   %>% mutate(data_name = "GSE85135") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Schulten_H[["clinical_data"]]     %>% mutate(data_name = "GSE77259") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Schmidt_M[["clinical_data"]]      %>% mutate(data_name = "GSE74385") %>% select(-c(1,2)) %>% as.data.frame(),
+                      TorresMartin_M[["clinical_data"]] %>% mutate(data_name = "GSE54934") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Yeh_T[["clinical_data"]]          %>% mutate(data_name = "GSE55609") %>% select(-c(1,2)) %>% as.data.frame(),
+                      DUrso_O[["clinical_data"]]        %>% mutate(data_name = "GSE16181") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Lee_Y[["clinical_data"]]          %>% mutate(data_name = "GSE16584") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Keller_A[["clinical_data"]]       %>% mutate(data_name = "GSE12530") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Claus_E[["clinical_data"]]        %>% mutate(data_name = "GSE9438") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Scheck_A[["clinical_data"]]       %>% mutate(data_name = "GSE4780") %>% select(-c(1,2)) %>% as.data.frame()
+                      )
+meningioma_datasets
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+    tableone::CreateTableOne(vars = c("grade", "recurrence", "disease", "age", "sex", "histology", "location"),
+                         data = meningioma_datasets,
+                         strata = "data_name")
+
+```
+
+

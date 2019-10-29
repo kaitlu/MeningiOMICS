@@ -6,9 +6,9 @@ output: html_document
 ---
 ## GSE12530 contains 24 tumor samples and 2 dura controls with gene expression data
 
-```{r setup, include=FALSE}
+```{r setup}
 knitr::opts_chunk$set(echo = TRUE,
-                      eval = FALSE)
+                      eval = TRUE)
 ```
 
 ```{r install_packages, eval = FALSE}
@@ -37,30 +37,46 @@ gse12530 <- getGEO("GSE12530",  # sample accession
 ## Clinical Data from Dataset
 ```{r ClinicalDataExtract}
 ## index into data list and extract clinical data
-gse12530_pheno <-
-                  gse12530[[1]] %>%           # index into list 
+gse12530_cd <-
+                  gse12530[["GSE12530_series_matrix.txt.gz"]] %>%           # index into list 
                   phenoData() %>%             # select phenoData
                   pData() %>%                 # apply pData
                   as_tibble() %>%             # tidy friendly
                   select("geo_accession" = geo_accession,
-                         "sample_id" = title, # do we need sample name and accession number?
+                         "sample_id" = title, 
                          "age" = `AGE:ch1`,
                          "sex" = `SEX:ch1`,
                          "grade" = `WHO:ch1`,
-                         "histology" = `HIST:ch1`) 
+                         "histology" = `HIST:ch1`
+                         ) 
+
+gse12530_pheno <- gse12530_cd %>%         # rename and adjust variables
+                     mutate(
+                            "age" = as.numeric(age),
+                            "sex" = factor(sex, 
+                                           levels = c("Male", "Female"), 
+                                           labels = c("m", "f")
+                                           ),
+                            "grade" = factor(grade, 
+                                             levels = c("1", "2", "3", "none"), 
+                                             labels = c("I", "II", "III", "benign")
+                                             )
+                                
+                        ) %>%
+                      mutate_if(is.character, as.factor)
 ```
 
 ## Expression Data from Dataset
 ```{r ExpressionDataExtract}
 ## index into data list and extract expression table.
 gse12530_exprs <- 
-                  gse12530[[1]] %>%   # index into list 
+                  gse12530[["GSE12530_series_matrix.txt.gz"]] %>%   # index into list 
                   exprs() %>%         # select expression data
                   as_tibble()         # tidy friendly
 
 ## index into data list and extract gene feature data
 gse12530_feature <- 
-                  gse12530[[1]] %>%  # index into list 
+                  gse12530[["GSE12530_series_matrix.txt.gz"]] %>%  # index into list 
                   fData() %>%        # select feature data
                   as_tibble()        # tidy friendly
 ```
@@ -88,8 +104,13 @@ gse12530_rna <-
                pivot_longer(-gene,                                            # do not group by gene 
                             names_to = "geo_accession",                       # 'key' via gather
                             values_to = "value") %>%                          
-               pivot_wider(names_from = "gene",                               # final format genes as rows
-                            values_from = "value")                            # final format expression across accession as columns    
+                mutate("standardized" = (value - mean(value))/           # center at mean for gene 
+                                         sd(value),                         # scale by sd for gene
+                       ) %>%
+                ungroup() %>%                                                  # ungroup by genes 
+                select(-value) %>%                                  # select all but sd column
+                pivot_wider(names_from = "gene",                               # final format genes as rows
+                            values_from = "standardized")                      # final format expression across accession as columns    
 ```
 
 ## Dataset for Analysis
@@ -101,13 +122,41 @@ gse12530_data <- inner_join(gse12530_pheno, gse12530_rna,
 ## create metatag for dataset
 gse12530_info <-  
                 list(
-                     name = "Keller_A",                    # author
-                     accession = "GSE12530"                # dataset accession 
+                     name = "Keller_A",                 # author
+                     accession = "GSE12530",            # dataset accession 
+                     # the following are logical to determine clinical data available for dataset
+                      geo_accession = "geo_accession" %in% colnames(gse12530_pheno),
+                      sample_id = "sample_id" %in% colnames(gse12530_pheno),
+                      age = "age" %in% colnames(gse12530_pheno),
+                      sex = "sex" %in% colnames(gse12530_pheno),
+                      grade = "grade" %in% colnames(gse12530_pheno),
+                      histology = "histology" %in% colnames(gse12530_pheno),
+                      type = "type" %in% colnames(gse12530_pheno),
+                      location = "location" %in% colnames(gse12530_pheno),
+                      mib1_index = "mib1_index" %in% colnames(gse12530_pheno),
+                      recurrence = "recurrence" %in% colnames(gse12530_pheno),
+                      recurrence_yrs = "recurrence_yrs" %in% colnames(gse12530_pheno),
+                      recurrence_freq = "recurrence_freq" %in% colnames(gse12530_pheno),
+                      survival_days = "survival_days" %in% colnames(gse12530_pheno),
+                      survival_yrs = "survival_yrs" %in% colnames(gse12530_pheno),
+                      vital_indicator = "vital_indicator" %in% colnames(gse12530_pheno),
+                      disease = "disease" %in% colnames(gse12530_pheno),
+                      progression = "progression" %in% colnames(gse12530_pheno),
+                      radiation = "radiation" %in% colnames(gse12530_pheno),
+                      rna_integrity ="rna_integrity" %in% colnames(gse12530_pheno),
+
+                      sample_numbers = nrow(gse12530_data) # number of samples
                      )
 
 ## create dataset as list 
 Keller_A <- list(
                  dataset_info = gse12530_info,             # metatag
-                 data = gse12530_data)                     # workable data
+                 clinical_data = gse12530_pheno,           # clinical data
+                 expression_data = gse12530_rna,           # expression data
+                 data = gse12530_data,                     # combined, workable data
+                 full_GEO = gse12530                       # full original download from GEO
+                 )                
 ```
-
+```{r}
+save(Keller_A, file = "~/Documents/Thesis/mgm_eda/datasets_scripts/GSE12530_Keller_A_KO.Rda") 
+```

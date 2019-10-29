@@ -5,9 +5,9 @@ date: "10/1/2019"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup}
 knitr::opts_chunk$set(echo = TRUE,
-                      eval = FALSE)
+                      eval = TRUE)
 ```
 
 ```{r install_packages, eval = FALSE}
@@ -36,32 +36,43 @@ gse85135 <- getGEO("gse85135",  # sample accession
 ## Clinical Data from Dataset
 ```{r ClinicalDataExtract}
 ## index into data list and extract clinical data
-gse85135_pheno <-
-                  gse85135[[1]] %>%           # index into list 
+gse85135_cd <-
+                  gse85135[["GSE85135-GPL10558_series_matrix.txt.gz"]] %>%   # index into list 
                   phenoData() %>%             # select phenoData
                   pData() %>%                 # apply pData
                   as_tibble() %>%             # tidy friendly
                   select("geo_accession" = geo_accession,
-                         "sample_id" = title, # do we need sample name and accession number?
-                         "age" = `age:ch1`,       
-                         "sex" = `gender:ch1`,         
-                         "grade" = `tumor grade:ch1`,         
-                         "histology" =  `histology:ch1`,   
-                         "location" = `tumor location:ch1`      
-                        ) 
+                         "sample_id" = title, 
+                         "grade" = `grade:ch1`,         
+                         "recurrence" =  `primary status:ch1`,   
+                         "disease" = `tissue:ch1`      
+                         ) 
+
+gse85135_pheno <- gse85135_cd %>%         # rename and adjust variables
+                     mutate(
+                            "grade" = factor(grade, 
+                                             levels = c("1", "2", "3", "none"), 
+                                             labels = c("I", "II", "III", "benign")
+                                             ),
+                            "recurrence" = factor(recurrence,
+                                                  levels = c("Primary", "Recurrent"),
+                                                  labels = c("primary", "recurrent")
+                                                  )    
+                    ) %>%
+                        mutate_if(is.character, as.factor)
 ```
 
 ## Expression Data from Dataset
 ```{r ExpressionDataExtract}
 ## index into data list and extract expression table.
 gse85135_exprs <- 
-                  gse85135[[1]] %>%   # index into list 
+                  gse85135[["GSE85135-GPL10558_series_matrix.txt.gz"]] %>%   # index into list 
                   exprs() %>%         # select expression data
                   as_tibble()         # tidy friendly
 
 ## index into data list and extract gene feature data
 gse85135_feature <- 
-                  gse85135[[1]] %>%  # index into list 
+                  gse85135[["GSE85135-GPL10558_series_matrix.txt.gz"]] %>%  # index into list 
                   fData() %>%        # select feature data
                   as_tibble()        # tidy friendly
 ```
@@ -88,11 +99,17 @@ gse85135_rna <-
                ungroup() %>%                                                  # ungroup by genes 
                select(-sd) %>%                                                # select all but sd column
                pivot_longer(-gene,                                            # do not group by gene 
-                            names_to = "geo_accession",                       # 'key' via gather
-                            values_to = "value") %>%                          
-               pivot_wider(names_from = "gene",                               # final format genes as rows
-                            values_from = "value")                            # final format expression across accession as columns    
-
+                             names_to = "geo_accession",                      # 'key' via gather
+                             values_to = "value") %>%
+                mutate("logvalue" = log2(value)) %>%                          # log2 transform expression for variance stabilization 
+                group_by(gene) %>%                                            # standardize for cross data set comparison
+                mutate("standardized" = (logvalue - mean(logvalue))/          # center at mean for gene 
+                                         sd(logvalue),                        # scale by sd for gene
+                       ) %>%
+                ungroup() %>%                                                 # ungroup by genes 
+                select(-value, -logvalue) %>%                                 # select all but sd column
+                pivot_wider(names_from = "gene",                              # final format genes as rows
+                            values_from = "standardized")                     # final format expression across accession as columns  
 ```
 
 ## Dataset for Analysis
@@ -104,12 +121,42 @@ gse85135_data <- inner_join(gse85135_pheno, gse85135_rna,
 ## create metatag for dataset
 gse85135_info <-  
                 list(
-                     name = "Clark_V",              # author
-                     accession = "GSE85135"                # dataset accession 
-                     )
+                     name = "Clark_V",                     # author
+                     accession = "GSE85135",               # dataset accession 
+                     # the following are logical to determine clinical data available for dataset
+                     geo_accession = "geo_accession" %in% colnames(gse85135_pheno),
+                      sample_id = "sample_id" %in% colnames(gse85135_pheno),
+                      age = "age" %in% colnames(gse85135_pheno),
+                      sex = "sex" %in% colnames(gse85135_pheno),
+                      grade = "grade" %in% colnames(gse85135_pheno),
+                      histology = "histology" %in% colnames(gse85135_pheno),
+                      type = "type" %in% colnames(gse85135_pheno),
+                      location = "location" %in% colnames(gse85135_pheno),
+                      mib1_index = "mib1_index" %in% colnames(gse85135_pheno),
+                      recurrence = "recurrence" %in% colnames(gse85135_pheno),
+                      recurrence_yrs = "recurrence_yrs" %in% colnames(gse85135_pheno),
+                      recurrence_freq = "recurrence_freq" %in% colnames(gse85135_pheno),
+                      survival_days = "survival_days" %in% colnames(gse85135_pheno),
+                      survival_yrs = "survival_yrs" %in% colnames(gse85135_pheno),
+                      vital_indicator = "vital_indicator" %in% colnames(gse85135_pheno),
+                      disease = "disease" %in% colnames(gse85135_pheno),
+                      progression = "progression" %in% colnames(gse85135_pheno),
+                      radiation = "radiation" %in% colnames(gse85135_pheno),
+                      rna_integrity ="rna_integrity" %in% colnames(gse85135_pheno),
+
+                    sample_numbers = nrow(gse85135_data) # number of samples   
+                )
 
 ## create dataset as list 
-Clark_V <- list(
-                        dataset_info = gse85135_info,      # metatag
-                        data = gse85135_data)              # workable data
+Clark_V_2016 <- list(
+                dataset_info = gse85135_info,             # metatag
+                clinical_data = gse85135_pheno,           # clinical data
+                expression_data = gse85135_rna,           # expression data
+                data = gse85135_data,                     # combined, workable data
+                full_GEO = gse85135                       # full original download from GEO
+            )
 ```
+```{r}
+save(Clark_V_2016, file = "~/Documents/Thesis/mgm_eda/datasets_scripts/GSE85135_Clark_V_KO.Rda") 
+```
+

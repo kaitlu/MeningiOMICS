@@ -1,0 +1,26 @@
+Data Dictionary
+
+pheno_data
+"geo_accession"     # geo_accession number
+"sample_id" =       # native sampleid in data set
+"age" =             # age (numeric)
+"sex" =             # sex (m, f)
+"grade" =           # WHO grade (I, II, III, benign)
+"histology" =       # histology
+"type" =            # histological type (tipic, anaplastic, etc)
+"location" =        # location
+"mib1_index" =      # mib-1 labeling indices
+"recurrence" =      # tumor recurrence (primary, recurrent)
+"recurrence_yrs"    # recurrence in years (numeric)
+"recurrence_freq" = # number of recurrences
+"survival_days" =   # survival in days (numeric)
+"survival_yrs" =    # survival in years (numeric)
+"disease" =         # specific for DRUSCO, OSTRUP - likely remove (natural factor)
+"progression" =     # whether or not the tumor reoccurred or progressed (nr, r, m)
+"radiation" =       # has patient recieved radiation (yes, no, unknown)
+"rna_integrity" =   # rni score (numeric)
+
+expression Data
+"gene" =           # gene name
+"mirna" =          # miRNA id
+"transcript_id"=   # specific for DALAN,  - need to rename ids

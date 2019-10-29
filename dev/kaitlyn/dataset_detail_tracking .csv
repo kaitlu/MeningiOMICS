@@ -1,0 +1,24 @@
+rmd prepped,clinical data standardized,RNA log and standardized,Notes for follow-up,Dataset,Series,Subseries,platform,Biologic data type,VALUE,number of samples,non_tumor_number,tumor_number,other_number,clinical_data,age,sex,grade,histology,type,location,mib-1 index,recurrence,recurrence_yrs,recurrence_freq,survival_days,survival_years,disease,progression,radiation,rna_integrity,species,note
+yes,yes,yes,"has mutation subgroup and radiation (all no), some samples are “meniges”",Clark_V_2016,GSE85135,GSE85133,GPL10558,RNA,quantile normalization,121,,,,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,Homo sapiens,"available as fpkm_tracking, which need to be manually downloaded"
+yes,yes,yes,potentially includes mutation profiles in titles,Clark_V,GSE58037,,GPL10558,RNA,background corrected and quantile normalized,114,0,114,0,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,1,Homo sapiens,
+yes,yes,yes,,Schulten_H,GSE77259,,GPL6244,RNA,RMA normalized ,14,,,,1,1,1,1,1,0,1,0,0,0,0,0,0,1,0,0,0,Homo sapiens,
+yes,yes,yes,progression after tumor sequenced – paper did full survivial analysis among other variables – is there another geodownload?,Schmidt_M,GSE74385,,GPL10558,RNA,"qspline normalized, median-centered log2 values",62,0,62,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,Homo sapiens,need further cleaning
+yes,yes,yes,has other disease types,TorresMartin_M,GSE54934,,GPL6244 ,log2RNA,RNA,65,45,3,22,1,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,Homo sapiens,Homo sapiens
+yes,yes,yes,arachnoid in grading – is this a grade? Right now it’s an NA,Yeh_T,GSE55609,,GPL570,RNA,Normalized signal intensity,24,0,24,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,Homo sapiens,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+yes,yes,yes,no vital status – type issues,Durso_O,GSE16181,,GPL8557,RNA,log2 ,189,0,189,0,1,1,1,1,0,1,1,1,0,1,0,0,1,0,0,0,0,Homo sapiens,
+yes,yes,yes,,Lee_Y,GSE16584,GSE16581,GPL570,RNA,,,0,68,0,1,1,1,1,0,0,0,1,1,0,1,1,0,1,0,0,0,Homo sapiens,
+yes,yes,yes,max sd,Keller_A,GSE12530,,GPL2895,RNA,Normalized signal intensity; log,26,2,24,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,Homo sapiens,
+yes,,,,Claus_E,GSE9438,,GPL570,,"The mRNA was reverse transcribed to generate cDNA, which was then biotinylated and hybridized to Affymetrix U133 plus 2.0 expression arrays",31,,,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,Homo sapiens,
+yes,,,grade only,Scheck_A,GSE4780,,GPL570,RNA,,57,,,,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,Homo sapiens,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+yes,yes,n/a – proteome normalized,"Proteome – has healthy controls, has grades I,II,III in title if used",Srivastava_S,GSE83507,,GPL22059,proteome,protein array – quantile normalized,30,,,,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,Homo sapiens,
+yes,yes,yes,Mixed disease type; also has DNA SNP available under other subseries ,Ostrup_O,GSE108089,,GPL570,RNA,quantile normalization,43,,,,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,Homo sapiens,
+yes,yes,no,no feature in geoDownload data -incomplete,Vasudevan_H,GSE101638,,GPL16791,RNA-seq,RNA,42,,,,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,,Homo sapiens
+yes,yes,no,no feature in geoDownload data -incomplete – dog? Grade II refers to both II/III in this dataset,Miller_A,GSE95048,,GPL20988,RNA-seq,Illumina HiSeq 2500 (Canis lupus familiaris),13,3,,,1,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,Canis lupus familiaris,
+yes,yes,yes,GB_ACC - appears to be transcripts - can we match to a known list? ,Dalan_A,GSE88721,GSE88720,GPL17692,mRNA,Log2 RMA signal,15,1,14,,1,1,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,Homo sapiens,problematic gene names
+yes,,,"this is miRNA in CSF, I don't think it's relevant",Drusco_A,GSE62381,,,miRNA,,,,,,0,,,,,,,,,,,,,,,,,Homo sapiens,
+yes,,,miRNA -  max sd,Ludwig_N,GSE50641,,GPL16770,miRNA,Non normalized raw intensity values for 1205 miRNAs in each of the 55 samples,,0,55,0,1,1,1,1,1,,,,,,,,,,,,,Homo sapiens,
+yes,,,,Tabanero O,GSE42624,,,DNA,,,,,,1,,,,,,,,,,,,,,,,,Homo sapiens,
+,,,,,GSE83933,,,methylation,,,,,,1,,,,,,,,,,,,,,,,,Homo sapiens,
+yes,,,couldn't extract data,Harmancı_A,GSE91376,,GPL11154,"CHIP-seq, methylation",,,,,,1,,,,,,,,,,,,,,,,,Homo sapiens,

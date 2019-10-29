@@ -37,31 +37,41 @@ gse88720 <- getGEO("gse88720",  # sample accession
 ## Clinical Data from Dataset
 ```{r ClinicalDataExtract}
 ## index into data list and extract clinical data
-gse88720_pheno <-
-                  gse88720[[1]] %>%           # index into list 
+gse88720_cd <-
+                  gse88720[["GSE88720_series_matrix.txt.gz"]] %>%           # index into list 
                   phenoData() %>%             # select phenoData
                   pData() %>%                 # apply pData
                   as_tibble() %>%             # tidy friendly
                   select("geo_accession" = geo_accession,
-                         "sample_id" = title, # do we need sample name and accession number?
+                         "sample_id" = title, 
                          "age" = `age:ch1`,
                          "sex" = `gender:ch1`,
-                         "type" = `tissue:ch1`,
-                         "location" = `location:ch1`
+                         "location" = `location:ch1`,
+                         "disease" = `tissue:ch1`
                          ) 
+
+gse88720_pheno <- gse88720_cd %>%         # rename and adjust variables
+                    mutate(
+                    "sex" = factor(sex, 
+                                   levels = c("Male", "Female"), 
+                                   labels = c("m", "f")
+                                     ),    
+                    "age" = as.numeric(age)
+                    ) %>%
+                    mutate_if(is.character, as.factor)
 ```
 
 ## Expression Data from Dataset
 ```{r ExpressionDataExtract}
 ## index into data list and extract expression table.
 gse88720_exprs <- 
-                  gse88720[[1]] %>%   # index into list 
+                  gse88720[["GSE88720_series_matrix.txt.gz"]] %>%   # index into list 
                   exprs() %>%         # select expression data
                   as_tibble()         # tidy friendly
 
 ## index into data list and extract transcript_id feature data
 gse88720_feature <- 
-                  gse88720[[1]] %>%  # index into list 
+                  gse88720[["GSE88720_series_matrix.txt.gz"]] %>%  # index into list 
                   fData() %>%        # select feature data
                   as_tibble()        # tidy friendly
 ```
@@ -81,7 +91,7 @@ gse88720_rna <-
                bind_cols(gse88720_feature["GB_ACC"], gse88720_exprs) %>% # add transcript_id name to expression data
                rename("transcript_id" = "GB_ACC") %>%                    # rename name variable as 'transcript_id' 
                filter(transcript_id != "") %>%                           # keep only data for named transcript_ids
-               mutate(sd = rowsd(.[,-1])) %>%                            # calculate sd for each probe, index out transcript_id name
+               mutate(sd = rowsd(.[ , -1])) %>%                          # calculate sd for each probe, index out transcript_id name
                group_by(transcript_id) %>%                               # group probes by transcript_id
                filter(sd == max(sd)) %>%                                 # keep the probe with the max variation for each transcript_id
                filter(row_number() == 1) %>%                             # remove duplicates
@@ -89,10 +99,16 @@ gse88720_rna <-
                select(-sd) %>%                                           # select all but sd column
                pivot_longer(-transcript_id,                              # do not group by transcript_id 
                             names_to = "geo_accession",                  # 'key' via gather
-                            values_to = "value") %>%                     
+                            values_to = "value") %>%
+               mutate("logvalue" = log2(value)) %>%                      # log2 transform expression for variance stabilization 
+               group_by(transcript_id) %>%                               # standardize for cross data set comparison
+               mutate("standardized" = (logvalue - mean(logvalue))/      # center at mean for transcript_id 
+                                        sd(logvalue),                    # scale by sd for transcript_id
+                      ) %>%
+               ungroup() %>%                                             # ungroup by transcript_ids 
+               select(-value, -logvalue) %>%                             # select all but sd column
                pivot_wider(names_from = "transcript_id",                 # final format transcript_ids as rows
-                            values_from = "value")                       # final format expression across accession as columns    
-
+                           values_from = "standardized")                 # final format expression across accession as columns    
 ```
 
 ## Dataset for Analysis
@@ -104,12 +120,35 @@ gse88720_data <- inner_join(gse88720_pheno, gse88720_rna,
 ## create metatag for dataset
 gse88720_info <-  
                 list(
-                     name = "Dalan_A",              # author
-                     accession = "GSE88720"                # dataset accession 
+                     name = "Dalan_A",                     # author
+                     accession = "GSE88720",               # dataset accession 
+                     # the following are logical to determine clinical data available for dataset
+                     sample_id = "sample_id" %in% colnames(gse88720_pheno)[-c(1,2)],   
+                     age = "age" %in% colnames(gse88720_pheno)[-c(1,2)],       
+                     sex = "sex" %in% colnames(gse88720_pheno)[-c(1,2)],             
+                     grade = "grade" %in% colnames(gse88720_pheno)[-c(1,2)],           
+                     histology = "histology" %in% colnames(gse88720_pheno)[-c(1,2)],       
+                     type = "type" %in% colnames(gse88720_pheno)[-c(1,2)],       
+                     location = "location" %in% colnames(gse88720_pheno)[-c(1,2)],       
+                     mib1_index = "mib1_index" %in% colnames(gse88720_pheno)[-c(1,2)],    
+                     recurrence = "recurrence" %in% colnames(gse88720_pheno)[-c(1,2)],    
+                     recurrence_yrs = "recurrence_yrs" %in% colnames(gse88720_pheno)[-c(1,2)],    
+                     recurrence_freq = "recurrence_freq" %in% colnames(gse88720_pheno)[-c(1,2)],  
+                     survival_days = "survival_days" %in% colnames(gse88720_pheno)[-c(1,2)], 
+                     survival_yrs = "survival_yrs" %in% colnames(gse88720_pheno)[-c(1,2)],     
+                     disease = "disease" %in% colnames(gse88720_pheno)[-c(1,2)],
+                     radiation = "radiation" %in% colnames(gse88720_pheno)[-c(1,2)],       
+                     rna_integrity ="rna_integrity" %in% colnames(gse88720_pheno)[-c(1,2)],
+                     
+                     sample_numbers = nrow(gse88720_data) # number of samples 
                      )
 
 ## create dataset as list 
 Dalan_A <- list(
-                        dataset_info = gse88720_info,      # metatag
-                        data = gse88720_data)              # workable data
+                dataset_info = gse88720_info,             # metatag
+                clinical_data = gse88720_pheno,           # clinical data
+                expression_data = gse88720_rna,           # expression data
+                data = gse88720_data,                     # combined, workable data
+                full_GEO = gse88720                       # full original download from GEO
+)
 ```

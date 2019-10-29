@@ -5,9 +5,10 @@ date: "10/1/2019"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+
+```{r setup}
 knitr::opts_chunk$set(echo = TRUE,
-                      eval = FALSE)
+                      eval = TRUE)
 ```
 
 ```{r install_packages, eval = FALSE}
@@ -37,12 +38,12 @@ gse9438 <- getGEO("gse9438",  # sample accession
 ```{r ClinicalDataExtract}
 ## index into data list and extract clinical data
 gse9438_pheno <-
-                  gse9438[[1]] %>%           # index into list 
+                  gse9438[["GSE9438_series_matrix.txt.gz"]] %>%           # index into list 
                   phenoData() %>%             # select phenoData
                   pData() %>%                 # apply pData
                   as_tibble() %>%             # tidy friendly
                   select("geo_accession" = geo_accession,
-                         "sample_id" = title, # do we need sample name and accession number?
+                         "sample_id" = title,
                          ) 
 ```
 
@@ -50,13 +51,13 @@ gse9438_pheno <-
 ```{r ExpressionDataExtract}
 ## index into data list and extract expression table.
 gse9438_exprs <- 
-                  gse9438[[1]] %>%   # index into list 
+                  gse9438[["GSE9438_series_matrix.txt.gz"]] %>%   # index into list 
                   exprs() %>%         # select expression data
                   as_tibble()         # tidy friendly
 
 ## index into data list and extract gene feature data
 gse9438_feature <- 
-                  gse9438[[1]] %>%  # index into list 
+                  gse9438[["GSE9438_series_matrix.txt.gz"]] %>%  # index into list 
                   fData() %>%        # select feature data
                   as_tibble()        # tidy friendly
 ```
@@ -84,9 +85,15 @@ gse9438_rna <-
                pivot_longer(-gene,                                            # do not group by gene 
                             names_to = "geo_accession",                       # 'key' via gather
                             values_to = "value") %>%                          
-               pivot_wider(names_from = "gene",                               # final format genes as rows
-                            values_from = "value")                            # final format expression across accession as columns    
-
+                mutate("logvalue" = log2(value)) %>%                           # log2 transform expression for variance stabilization 
+                group_by(gene) %>%                                             # standardize for cross data set comparison
+                mutate("standardized" = (logvalue - mean(logvalue))/           # center at mean for gene 
+                                         sd(logvalue),                         # scale by sd for gene
+                       ) %>%
+                ungroup() %>%                                                  # ungroup by genes 
+                select(-value, -logvalue) %>%                                  # select all but sd column
+                pivot_wider(names_from = "gene",                               # final format genes as rows
+                            values_from = "standardized")                      # final format expression across accession as columns  
 ```
 
 ## Dataset for Analysis
@@ -98,12 +105,44 @@ gse9438_data <- inner_join(gse9438_pheno, gse9438_rna,
 ## create metatag for dataset
 gse9438_info <-  
                 list(
-                     name = "Claus_e",              # author
-                     accession = "GSE9438"                # dataset accession 
+                     name = "Claus_E",              # author
+                     accession = "GSE9438",         # dataset accession 
+                     # the following are logical to determine clinical data available for dataset
+                      geo_accession = "geo_accession" %in% colnames(gse9438_pheno),
+                      sample_id = "sample_id" %in% colnames(gse9438_pheno),
+                      age = "age" %in% colnames(gse9438_pheno),
+                      sex = "sex" %in% colnames(gse9438_pheno),
+                      grade = "grade" %in% colnames(gse9438_pheno),
+                      histology = "histology" %in% colnames(gse9438_pheno),
+                      type = "type" %in% colnames(gse9438_pheno),
+                      location = "location" %in% colnames(gse9438_pheno),
+                      mib1_index = "mib1_index" %in% colnames(gse9438_pheno),
+                      recurrence = "recurrence" %in% colnames(gse9438_pheno),
+                      recurrence_yrs = "recurrence_yrs" %in% colnames(gse9438_pheno),
+                      recurrence_freq = "recurrence_freq" %in% colnames(gse9438_pheno),
+                      survival_days = "survival_days" %in% colnames(gse9438_pheno),
+                      survival_yrs = "survival_yrs" %in% colnames(gse9438_pheno),
+                      vital_indicator = "vital_indicator" %in% colnames(gse9438_pheno),
+                      disease = "disease" %in% colnames(gse9438_pheno),
+                      progression = "progression" %in% colnames(gse9438_pheno),
+                      radiation = "radiation" %in% colnames(gse9438_pheno),
+                      rna_integrity ="rna_integrity" %in% colnames(gse9438_pheno),
+
+                      sample_numbers = nrow(gse9438_data) # number of samples
                      )
+
+
 
 ## create dataset as list 
 Claus_E <- list(
-                        dataset_info = gse9438_info,      # metatag
-                        data = gse9438_data)              # workable data
+                dataset_info = gse9438_info,             # metatag
+                clinical_data = gse9438_pheno,           # clinical data
+                expression_data = gse9438_rna,           # expression data
+                data = gse9438_data,                     # combined, workable data
+                full_GEO = gse9438                       # full original download from GEO
+                )
+```
+
+```{r}
+save(Claus_E, file = "~/Documents/Thesis/mgm_eda/datasets_scripts/GSE9438_Claus_E_KO.Rda") 
 ```

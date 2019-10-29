@@ -23,12 +23,12 @@ library("tidyverse")
 library("GEOquery")
 ```
 
-## Get GSE77259 from GEO
+## Get GSE91376 from GEO
 ```{r Geo_download, message=FALSE, warning=FALSE}
 ## Download dataset from GEO, save downloaded files in the same folder as this .Rmd file.
-dir.create(file.path("raw","gse77259"), recursive = TRUE)
-gse77259 <- getGEO("gse77259",  # sample accession 
-                   destdir = file.path("raw","gse77259"),
+dir.create(file.path("raw","gse91376"), recursive = TRUE)
+gse91376 <- getGEO("gse91376",  # sample accession 
+                   destdir = file.path("raw","gse91376"),
                    GSEMatrix = TRUE,
                    AnnotGPL = TRUE)
 ```
@@ -36,32 +36,32 @@ gse77259 <- getGEO("gse77259",  # sample accession
 ## Clinical Data from Dataset
 ```{r ClinicalDataExtract}
 ## index into data list and extract clinical data
-gse77259_pheno <-
-                  gse77259[[1]] %>%           # index into list 
+gse91376_pheno <-
+                  gse91376[[1]] %>%           # index into list 
                   phenoData() %>%             # select phenoData
                   pData() %>%                 # apply pData
                   as_tibble() %>%             # tidy friendly
                   select("geo_accession" = geo_accession,
                          "sample_id" = title, # do we need sample name and accession number?
-                         "age" = `age:ch1`,       
-                         "sex" = `gender:ch1`,         
+                        # "age" = `age:ch1`,       
+                        # "sex" = `gender:ch1`,         
                          "grade" = `tumor grade:ch1`,         
-                         "histology" =  `histology:ch1`,   
-                         "location" = `tumor location:ch1`      
+                         "tissue" =  `tissue type:ch1`,   
+                         #"location" = `tumor location:ch1`      this needs more cleaning
                         ) 
 ```
 
 ## Expression Data from Dataset
 ```{r ExpressionDataExtract}
 ## index into data list and extract expression table.
-gse77259_exprs <- 
-                  gse77259[[1]] %>%   # index into list 
+gse91376_exprs <- 
+                  gse91376[[1]] %>%   # index into list 
                   exprs() %>%         # select expression data
                   as_tibble()         # tidy friendly
 
 ## index into data list and extract gene feature data
-gse77259_feature <- 
-                  gse77259[[1]] %>%  # index into list 
+gse91376_feature <- 
+                  gse91376[[1]] %>%  # index into list 
                   fData() %>%        # select feature data
                   as_tibble()        # tidy friendly
 ```
@@ -77,8 +77,8 @@ rowsd <- function(x) {
 }
 
 ## keep only the probe with greatest variability across tumors as rna variable and gene names
-gse77259_rna <-
-               bind_cols(gse77259_feature["Gene symbol"], gse77259_exprs) %>% # add gene name to expression data
+gse91376_rna <-
+               bind_cols(gse91376_feature["Gene symbol"], gse91376_exprs) %>% # add gene name to expression data
                rename("gene" = "Gene symbol") %>%                             # rename name variable as 'gene' 
                filter(gene != "") %>%                                         # keep only data for named genes
                mutate(sd = rowsd(.[,-1])) %>%                                 # calculate sd for each probe, index out gene name
@@ -98,18 +98,18 @@ gse77259_rna <-
 ## Dataset for Analysis
 ```{r FinalDataset}
 ## combine phenotype and expression data for workable data
-gse77259_data <- inner_join(gse77259_pheno, gse77259_rna, 
+gse91376_data <- inner_join(gse91376_pheno, gse91376_rna, 
                             by = "geo_accession")          # match by accession
 
 ## create metatag for dataset
-gse77259_info <-  
+gse91376_info <-  
                 list(
                      name = "Schulten_H",              # author
-                     accession = "GSE77259"                # dataset accession 
+                     accession = "GSE91376"                # dataset accession 
                      )
 
 ## create dataset as list 
 Schulten_H <- list(
-                        dataset_info = gse77259_info,      # metatag
-                        data = gse77259_data)              # workable data
+                        dataset_info = gse91376_info,      # metatag
+                        data = gse91376_data)              # workable data
 ```
