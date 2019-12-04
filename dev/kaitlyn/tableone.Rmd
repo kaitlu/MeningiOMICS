@@ -1,17 +1,30 @@
 ---
 title: "Table One"
-author: "Kaitlyn O'Shea"
-date: "10/29/2019"
-output: html_document
+output:
+  html_document: 
+    theme: flatly
+  pdf_document: default
+  word_document: default
 ---
 
-```{r}
+<style>
+body {
+    position: absolute;
+    left: 0px;}
+</style>
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
 library(dplyr)
+library(Hmisc)
 library(knitr)
+library(survival)
+library(tableone)
+library(table1)
+library(kableExtra)
 ```
 
 
-```{r}
+```{r include=FALSE}
 load("~/Documents/Thesis/mgm_eda/datasets/GSE85135_Clark_V_KO.Rda")
 load("~/Documents/Thesis/mgm_eda/datasets/GSE58037_Clark_V_KO.Rda")
 load("~/Documents/Thesis/mgm_eda/datasets/GSE77259_Schulten_H_KO.Rda")
@@ -28,7 +41,7 @@ load("~/Documents/Thesis/mgm_eda/datasets/GSE4780_Scheck_A_KO.Rda")
 
 
 
-```{r}
+```{r include=FALSE}
 meningioma_datasets <- bind_rows(
                       Clark_V[["clinical_data"]]        %>% mutate(data_name = "GSE58037") %>% select(-c(1,2)) %>% as.data.frame(),
                       Clark_V_2016[["clinical_data"]]   %>% mutate(data_name = "GSE85135") %>% select(-c(1,2)) %>% as.data.frame(),
@@ -37,20 +50,87 @@ meningioma_datasets <- bind_rows(
                       TorresMartin_M[["clinical_data"]] %>% mutate(data_name = "GSE54934") %>% select(-c(1,2)) %>% as.data.frame(),
                       Yeh_T[["clinical_data"]]          %>% mutate(data_name = "GSE55609") %>% select(-c(1,2)) %>% as.data.frame(),
                       DUrso_O[["clinical_data"]]        %>% mutate(data_name = "GSE16181") %>% select(-c(1,2)) %>% as.data.frame(),
-                      Lee_Y[["clinical_data"]]          %>% mutate(data_name = "GSE16584") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Lee_Y[["clinical_data"]]          %>% mutate(data_name = "GSE16581") %>% select(-c(1,2)) %>% as.data.frame(),
                       Keller_A[["clinical_data"]]       %>% mutate(data_name = "GSE12530") %>% select(-c(1,2)) %>% as.data.frame(),
                       Claus_E[["clinical_data"]]        %>% mutate(data_name = "GSE9438") %>% select(-c(1,2)) %>% as.data.frame(),
                       Scheck_A[["clinical_data"]]       %>% mutate(data_name = "GSE4780") %>% select(-c(1,2)) %>% as.data.frame()
                       )
-meningioma_datasets
+
+
+        label(meningioma_datasets$age) <- "Age"
+        label(meningioma_datasets$sex) <- "Sex"
+        label(meningioma_datasets$grade) <- "Grade"
+        label(meningioma_datasets$recurrence) <- "Recurrence"
+        label(meningioma_datasets$recurrence_yrs) <- "Time to Recurrence"
+        label(meningioma_datasets$recurrence_freq) <- "Frequency of Recurrence"
+        label(meningioma_datasets$followup_days) <- "Follow-up Time"
+        label(meningioma_datasets$survival_yrs) <- "Survival Time"
+        label(meningioma_datasets$vital_indicator) <- "Patient Status"
+        label(meningioma_datasets$tissue) <- "Tissue Type"
+        
+        units(meningioma_datasets$recurrence_yrs) <- "years"
+        units(meningioma_datasets$followup_days) <- "days"
+        units(meningioma_datasets$survival_yrs) <- "years"
+        
+tableone_meningioma <- meningioma_datasets %>% 
+  mutate(sex = case_when(sex == "m" ~ "Male", 
+                         sex == "f" ~ "Female",
+                         TRUE ~ as.character(sex)
+                         ),
+         recurrence = case_when(recurrence == "primary" ~ "Primary",
+                                recurrence == "recurrent" ~ "Recurrent",
+                                TRUE ~ as.character(recurrence)
+                                ),
+         vital_indicator = case_when(vital_indicator == 1 ~ "Deceased",
+                                     vital_indicator == 0 ~ "Alive",
+                                     TRUE ~ as.character(vital_indicator)
+                                     ),
+         tissue = case_when(tissue == "meningioma" ~ "Meningioma",
+                             tissue == "meninges" ~ "Meninges",
+                             TRUE ~as.character(tissue)
+                             )
+         )
+
+
+        label(tableone_meningioma$age) <- "Age"
+        label(tableone_meningioma$sex) <- "Sex"
+        label(tableone_meningioma$grade) <- "Grade"
+        label(tableone_meningioma$recurrence) <- "Recurrence"
+        label(tableone_meningioma$recurrence_yrs) <- "Time to Recurrence"
+        label(tableone_meningioma$recurrence_freq) <- "Frequency of Recurrence"
+        label(tableone_meningioma$followup_days) <- "Follow-up Time"
+        label(tableone_meningioma$survival_yrs) <- "Survival Time"
+        label(tableone_meningioma$vital_indicator) <- "Patient Status"
+        label(tableone_meningioma$tissue) <- "Tissue Type"
+        
+        units(tableone_meningioma$recurrence_yrs) <- "years"
+        units(tableone_meningioma$followup_days) <- "days"
+        units(tableone_meningioma$survival_yrs) <- "years"
+        
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, paged.print=TRUE}
+tableone <- CreateTableOne(vars = c("age", "sex", "grade", "recurrence", "recurrence_yrs", "recurrence_freq", "followup_days", "survival_yrs", "vital_status", "tissue", "progression"),
+                                data = tableone_meningioma,
+                                strata = "data_name",
+                                includeNA = T,
+                                test = F,
+                                smd = F)
 
-    tableone::CreateTableOne(vars = c("grade", "recurrence", "disease", "age", "sex", "histology", "location"),
-                         data = meningioma_datasets,
-                         strata = "data_name")
+kableone(tableone)
+```
+
+```{r echo=FALSE}
+
+
+
+table1(data = tableone_meningioma, 
+       ~ age + sex + grade + recurrence + recurrence_yrs + recurrence_freq + followup_days + survival_yrs + vital_indicator + tissue | data_name,
+       rowlabelhead = "Dataset GEO Accession"
+       )
 
 ```
+
+
 
 

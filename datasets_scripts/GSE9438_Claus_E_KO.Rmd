@@ -37,7 +37,7 @@ gse9438 <- getGEO("gse9438",  # sample accession
 ## Clinical Data from Dataset
 ```{r ClinicalDataExtract}
 ## index into data list and extract clinical data
-gse9438_pheno <-
+gse9438_cd <-
                   gse9438[["GSE9438_series_matrix.txt.gz"]] %>%           # index into list 
                   phenoData() %>%             # select phenoData
                   pData() %>%                 # apply pData
@@ -45,6 +45,10 @@ gse9438_pheno <-
                   select("geo_accession" = geo_accession,
                          "sample_id" = title,
                          ) 
+
+gse9438_pheno <- gse9438_cd %>% mutate(
+                        "tissue" = "meningioma"
+)
 ```
 
 ## Expression Data from Dataset
@@ -120,10 +124,10 @@ gse9438_info <-
                       recurrence = "recurrence" %in% colnames(gse9438_pheno),
                       recurrence_yrs = "recurrence_yrs" %in% colnames(gse9438_pheno),
                       recurrence_freq = "recurrence_freq" %in% colnames(gse9438_pheno),
-                      survival_days = "survival_days" %in% colnames(gse9438_pheno),
+                      followup_days = "followup_days" %in% colnames(gse9438_pheno),
                       survival_yrs = "survival_yrs" %in% colnames(gse9438_pheno),
                       vital_indicator = "vital_indicator" %in% colnames(gse9438_pheno),
-                      disease = "disease" %in% colnames(gse9438_pheno),
+                      tissue = "tissue" %in% colnames(gse9438_pheno),
                       progression = "progression" %in% colnames(gse9438_pheno),
                       radiation = "radiation" %in% colnames(gse9438_pheno),
                       rna_integrity ="rna_integrity" %in% colnames(gse9438_pheno),
@@ -144,5 +148,5 @@ Claus_E <- list(
 ```
 
 ```{r}
-save(Claus_E, file = "~/Documents/Thesis/mgm_eda/datasets_scripts/GSE9438_Claus_E_KO.Rda") 
+save(Claus_E, file = "~/Documents/Thesis/mgm_eda/datasets/GSE9438_Claus_E_KO.Rda") 
 ```

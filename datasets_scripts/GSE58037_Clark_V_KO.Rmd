@@ -53,8 +53,8 @@ gse58037_cd <-
 gse58037_pheno <- gse58037_cd %>%         # rename and adjust variables
                      mutate(
                             "grade" = factor(grade, 
-                                             levels = c("1", "2", "3", "none"), 
-                                             labels = c("I", "II", "III", "benign")
+                                             levels = c("1", "2", "3"), 
+                                             labels = c("I", "II", "III")
                                              ),
                             "recurrence" = factor(recurrence,
                                                   levels = c("PRIMARY", "Recurrent"),
@@ -64,7 +64,8 @@ gse58037_pheno <- gse58037_cd %>%         # rename and adjust variables
                                                  levels = c("Yes", "No", "Unknown"),
                                                  labels = c("yes", "no", "unknown")
                                                   ),
-                            "rna_integrity" = as.numeric(rna_integrity)    
+                            "rna_integrity" = as.numeric(rna_integrity),
+                            "tissue" = "meningioma"    
                     ) %>%
                       mutate_if(is.character, as.factor)
 ```
@@ -143,10 +144,10 @@ gse58037_info <-
                       recurrence = "recurrence" %in% colnames(gse58037_pheno),
                       recurrence_yrs = "recurrence_yrs" %in% colnames(gse58037_pheno),
                       recurrence_freq = "recurrence_freq" %in% colnames(gse58037_pheno),
-                      survival_days = "survival_days" %in% colnames(gse58037_pheno),
+                      followup_days = "followup_days" %in% colnames(gse58037_pheno),
                       survival_yrs = "survival_yrs" %in% colnames(gse58037_pheno),
                       vital_indicator = "vital_indicator" %in% colnames(gse58037_pheno),
-                      disease = "disease" %in% colnames(gse58037_pheno),
+                      tissue = "tissue" %in% colnames(gse58037_pheno),
                       progression = "progression" %in% colnames(gse58037_pheno),
                       radiation = "radiation" %in% colnames(gse58037_pheno),
                       rna_integrity ="rna_integrity" %in% colnames(gse58037_pheno),
@@ -164,5 +165,5 @@ Clark_V <- list(
 )
 ```
 ```{r}
-save(Clark_V, file = "~/Documents/Thesis/mgm_eda/datasets_scripts/GSE58037_Clark_V_KO.Rda") 
+save(Clark_V, file = "~/Documents/Thesis/mgm_eda/datasets/GSE58037_Clark_V_KO.Rda") 
 ```

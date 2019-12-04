@@ -13,9 +13,9 @@ pheno_data
 "recurrence" =      # tumor recurrence (primary, recurrent)
 "recurrence_yrs"    # recurrence in years (numeric)
 "recurrence_freq" = # number of recurrences
-"survival_days" =   # survival in days (numeric)
+"followup_days" =   # follow up time in days (numeric)
 "survival_yrs" =    # survival in years (numeric)
-"disease" =         # specific for DRUSCO, OSTRUP - likely remove (natural factor)
+"tissue" =          # tissue type (character)
 "progression" =     # whether or not the tumor reoccurred or progressed (nr, r, m)
 "radiation" =       # has patient recieved radiation (yes, no, unknown)
 "rna_integrity" =   # rni score (numeric)

@@ -51,18 +51,20 @@ gse74385_pheno <- gse74385_cd %>% mutate(
                                         "progression" = str_sub(subtype, 2)   # pull out the progression from the variable
                                         ) %>% mutate(
                                             "grade" = factor(grade, 
-                                                             levels = c("1", "2", "3", "none"), 
-                                                             labels = c("I", "II", "III", "benign")
+                                                             levels = c("1", "2", "3"), 
+                                                             labels = c("I", "II", "III")
                                                              ),
                                             "progression" = factor(progression,
                                                                    levels = c("NR", "R", "M"),
                                                                    labels = c("nr", "r", "m")
-                                                                   )
+                                                                   ),
+                                            "tissue" = "meningioma"
                                         ) %>% select(
                                                     geo_accession,
                                                     sample_id,
                                                     grade,
-                                                    progression
+                                                    progression,
+                                                    tissue
                                         )
                     
 ```
@@ -140,10 +142,10 @@ gse74385_info <-
                       recurrence = "recurrence" %in% colnames(gse74385_pheno),
                       recurrence_yrs = "recurrence_yrs" %in% colnames(gse74385_pheno),
                       recurrence_freq = "recurrence_freq" %in% colnames(gse74385_pheno),
-                      survival_days = "survival_days" %in% colnames(gse74385_pheno),
+                      followup_days = "followup_days" %in% colnames(gse74385_pheno),
                       survival_yrs = "survival_yrs" %in% colnames(gse74385_pheno),
                       vital_indicator = "vital_indicator" %in% colnames(gse74385_pheno),
-                      disease = "disease" %in% colnames(gse74385_pheno),
+                      tissue = "tissue" %in% colnames(gse74385_pheno),
                       progression = "progression" %in% colnames(gse74385_pheno),
                       radiation = "radiation" %in% colnames(gse74385_pheno),
                       rna_integrity ="rna_integrity" %in% colnames(gse74385_pheno),
@@ -162,5 +164,5 @@ Schmidt_M <- list(
 ```
 
 ```{r}
-save(Schmidt_M, file = "~/Documents/Thesis/mgm_eda/datasets_scripts/GSE74385_Schmidt_M_KO.Rda") 
+save(Schmidt_M, file = "~/Documents/Thesis/mgm_eda/datasets/GSE74385_Schmidt_M_KO.Rda") 
 ```

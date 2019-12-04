@@ -45,14 +45,14 @@ gse85135_cd <-
                          "sample_id" = title, 
                          "grade" = `grade:ch1`,         
                          "recurrence" =  `primary status:ch1`,   
-                         "disease" = `tissue:ch1`      
+                         "tissue" = `tissue:ch1`      
                          ) 
 
 gse85135_pheno <- gse85135_cd %>%         # rename and adjust variables
                      mutate(
                             "grade" = factor(grade, 
-                                             levels = c("1", "2", "3", "none"), 
-                                             labels = c("I", "II", "III", "benign")
+                                             levels = c("1", "2", "3"), 
+                                             labels = c("I", "II", "III")
                                              ),
                             "recurrence" = factor(recurrence,
                                                   levels = c("Primary", "Recurrent"),
@@ -136,10 +136,10 @@ gse85135_info <-
                       recurrence = "recurrence" %in% colnames(gse85135_pheno),
                       recurrence_yrs = "recurrence_yrs" %in% colnames(gse85135_pheno),
                       recurrence_freq = "recurrence_freq" %in% colnames(gse85135_pheno),
-                      survival_days = "survival_days" %in% colnames(gse85135_pheno),
+                      followup_days = "followup_days" %in% colnames(gse85135_pheno),
                       survival_yrs = "survival_yrs" %in% colnames(gse85135_pheno),
                       vital_indicator = "vital_indicator" %in% colnames(gse85135_pheno),
-                      disease = "disease" %in% colnames(gse85135_pheno),
+                      tissue = "tissue" %in% colnames(gse85135_pheno),
                       progression = "progression" %in% colnames(gse85135_pheno),
                       radiation = "radiation" %in% colnames(gse85135_pheno),
                       rna_integrity ="rna_integrity" %in% colnames(gse85135_pheno),
@@ -157,6 +157,6 @@ Clark_V_2016 <- list(
             )
 ```
 ```{r}
-save(Clark_V_2016, file = "~/Documents/Thesis/mgm_eda/datasets_scripts/GSE85135_Clark_V_KO.Rda") 
+save(Clark_V_2016, file = "~/Documents/Thesis/mgm_eda/datasets/GSE85135_Clark_V_KO.Rda") 
 ```
 

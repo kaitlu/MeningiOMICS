@@ -53,11 +53,11 @@ gse4780_pheno <- gse4780_cd %>%         # rename and adjust variables
                             "recurrence" = str_split(string = description,
                                                      pattern = " ",
                                                      simplify = T)[,2],     # pull out the recurrence from the description data
-                            "disease" = "menigioma"
+                            "tissue" = "meningioma"
                             ) %>% mutate(
                                 "grade" = factor(grade, 
-                                                levels = c("1", "2", "3", "none"), 
-                                                labels = c("I", "II", "III", "benign")
+                                                levels = c("1", "2", "3"), 
+                                                labels = c("I", "II", "III")
                                              ),
                                 "recurrence" = factor(recurrence,
                                                       levels = c("Primary", "Recurrent"),
@@ -68,7 +68,7 @@ gse4780_pheno <- gse4780_cd %>%         # rename and adjust variables
                                  sample_id,
                                  grade,
                                  recurrence,
-                                 disease
+                                 tissue
                                 ) %>%
                                       mutate_if(is.character, as.factor)
 ```
@@ -146,10 +146,10 @@ gse4780_info <-
                       recurrence = "recurrence" %in% colnames(gse4780_pheno),
                       recurrence_yrs = "recurrence_yrs" %in% colnames(gse4780_pheno),
                       recurrence_freq = "recurrence_freq" %in% colnames(gse4780_pheno),
-                      survival_days = "survival_days" %in% colnames(gse4780_pheno),
+                      followup_days = "followup_days" %in% colnames(gse4780_pheno),
                       survival_yrs = "survival_yrs" %in% colnames(gse4780_pheno),
                       vital_indicator = "vital_indicator" %in% colnames(gse4780_pheno),
-                      disease = "disease" %in% colnames(gse4780_pheno),
+                      tissue = "tissue" %in% colnames(gse4780_pheno),
                       progression = "progression" %in% colnames(gse4780_pheno),
                       radiation = "radiation" %in% colnames(gse4780_pheno),
                       rna_integrity ="rna_integrity" %in% colnames(gse4780_pheno),
@@ -168,6 +168,6 @@ Scheck_A <- list(
 ```
 
 ```{r}
-save(Scheck_A, file = "~/Documents/Thesis/mgm_eda/datasets_scripts/GSE4780_Scheck_A_KO.Rda") 
+save(Scheck_A, file = "~/Documents/Thesis/mgm_eda/datasets/GSE4780_Scheck_A_KO.Rda") 
 ```
 

@@ -58,10 +58,10 @@ gse12530_pheno <- gse12530_cd %>%         # rename and adjust variables
                                            labels = c("m", "f")
                                            ),
                             "grade" = factor(grade, 
-                                             levels = c("1", "2", "3", "none"), 
-                                             labels = c("I", "II", "III", "benign")
-                                             )
-                                
+                                             levels = c("1", "2", "3"), 
+                                             labels = c("I", "II", "III")
+                                             ),
+                            "tissue" = "meningioma"
                         ) %>%
                       mutate_if(is.character, as.factor)
 ```
@@ -137,10 +137,10 @@ gse12530_info <-
                       recurrence = "recurrence" %in% colnames(gse12530_pheno),
                       recurrence_yrs = "recurrence_yrs" %in% colnames(gse12530_pheno),
                       recurrence_freq = "recurrence_freq" %in% colnames(gse12530_pheno),
-                      survival_days = "survival_days" %in% colnames(gse12530_pheno),
+                      followup_days = "followup_days" %in% colnames(gse12530_pheno),
                       survival_yrs = "survival_yrs" %in% colnames(gse12530_pheno),
                       vital_indicator = "vital_indicator" %in% colnames(gse12530_pheno),
-                      disease = "disease" %in% colnames(gse12530_pheno),
+                      tissue = "tissue" %in% colnames(gse12530_pheno),
                       progression = "progression" %in% colnames(gse12530_pheno),
                       radiation = "radiation" %in% colnames(gse12530_pheno),
                       rna_integrity ="rna_integrity" %in% colnames(gse12530_pheno),
@@ -158,5 +158,5 @@ Keller_A <- list(
                  )                
 ```
 ```{r}
-save(Keller_A, file = "~/Documents/Thesis/mgm_eda/datasets_scripts/GSE12530_Keller_A_KO.Rda") 
+save(Keller_A, file = "~/Documents/Thesis/mgm_eda/datasets/GSE12530_Keller_A_KO.Rda") 
 ```

@@ -49,9 +49,10 @@ gse55609_cd <-
 
 gse55609_pheno <- gse55609_cd %>% mutate(
                                               "grade" = factor(grade, 
-                                                               levels = c("WHO grade I", "WHO grade II", "WHO grade III", "none"), 
-                                                               labels = c("I", "II", "III", "benign")
-                                                               )
+                                                               levels = c("WHO grade I", "WHO grade II", "WHO grade III"), 
+                                                               labels = c("I", "II", "III")
+                                                               ),
+                                              "tissue" = "meningioma"
                                             ) %>% 
                                                 mutate_if(is.character, as.factor)
 ```
@@ -129,10 +130,10 @@ gse55609_info <-
                       recurrence = "recurrence" %in% colnames(gse55609_pheno),
                       recurrence_yrs = "recurrence_yrs" %in% colnames(gse55609_pheno),
                       recurrence_freq = "recurrence_freq" %in% colnames(gse55609_pheno),
-                      survival_days = "survival_days" %in% colnames(gse55609_pheno),
+                      followup_days = "followup_days" %in% colnames(gse55609_pheno),
                       survival_yrs = "survival_yrs" %in% colnames(gse55609_pheno),
                       vital_indicator = "vital_indicator" %in% colnames(gse55609_pheno),
-                      disease = "disease" %in% colnames(gse55609_pheno),
+                      tissue = "tissue" %in% colnames(gse55609_pheno),
                       progression = "progression" %in% colnames(gse55609_pheno),
                       radiation = "radiation" %in% colnames(gse55609_pheno),
                       rna_integrity ="rna_integrity" %in% colnames(gse55609_pheno),
@@ -150,5 +151,5 @@ Yeh_T <- list(
               )
 ```
 ```{r}
-save(Yeh_T, file = "~/Documents/Thesis/mgm_eda/datasets_scripts/GSE55609_Yeh_T_KO.Rda") 
+save(Yeh_T, file = "~/Documents/Thesis/mgm_eda/datasets/GSE55609_Yeh_T_KO.Rda") 
 ```
