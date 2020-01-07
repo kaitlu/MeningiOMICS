@@ -96,6 +96,8 @@ server <- function(input, output, session) {
                    y = !!gv())
                ) +
             geom_boxplot() +
+            geom_jitter(width = .25,
+                        color = "#0072B2") +             # accessible blue
             theme_bw() +
             ggtitle("Expression by WHO Grade") +
             xlab("WHO Grade") +
@@ -105,7 +107,7 @@ server <- function(input, output, session) {
                          aes(ymax = ..y.., ymin = ..y..),
                          width = .75,
                          linetype = "dashed",
-                         color = "blue")
+                         color = "#0072B2")
           })
 
     variance <- reactive({
