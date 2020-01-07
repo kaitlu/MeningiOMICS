@@ -7,24 +7,39 @@ fluidPage(
             helpText("Analyis and visualization of RNA expression over clinical outcomes"),
     
             ## select gene to group by
-            selectInput("gene",
-                        label = "Select a gene",
+            selectizeInput("gene",
+                        label = "Gene",
                         choices = gene,
-                        selected = "PTTG1"
+                        options = list(
+                                       placeholder = 'Please select an option below',
+                                       onInitialize = I('function() { this.setValue(""); }')
+                        )
             ),
               
-             ## select variable to group by
-              selectInput("grouping",
+            ## select variable to group by
+            selectizeInput("grouping",
                           label = "Select variable to analyze",
-                          choices = variables,        # list of variables created in global.R
-                          selected = "grade"
+                          # choices = variables,        # list of variables available for selected gene
+                          # selected = "grade"
+                          choices = NULL,
+                          selected = NULL,
+                          options = list(
+                              placeholder = 'Please select an option below',
+                              onInitialize = I('function() { this.setValue(""); }')
+                          )
                           ),
             
             ## select dataset to analyze
-            selectInput("dataset",
+            selectizeInput("dataset",
                         label = "Select a dataset", 
-                        choices = datasets,         # list of datasets created in global.R
-                        selected = "Schmidt_M"
+                        # choices = datasets,         # list of datasets with both the gene and clinical selection available
+                        # selected = "Schmidt_M"
+                        choices = NULL,
+                        selected = NULL,
+                        options = list(
+                            placeholder = 'Please select an option below',
+                            onInitialize = I('function() { this.setValue(""); }')
+                        )
             ),
     ),
         

@@ -5,6 +5,57 @@ date: "12/16/2019"
 output: html_document
 ---
 
+Finding all genes in all datasets
+```{r}
+colnames <- colnames(Clark_V_2016[["expression_data"]])
+
+gene <- character()                                                     # create an empty character vector
+for (p in datasets) {
+    gene <- unique(
+                   c(gene, 
+                     colnames(eval(as.symbol(p))[["expression_data"]])
+                     )
+    )
+}
+```
+
+
+Finding clinical variables in the data sets with a selected gene
+```{r}
+clinical_variables <- character()
+for (i in datasets) {
+    if("PTTG1" %in% colnames(eval(as.symbol(i))[["expression_data"]])
+     ) {
+                                 clinical_variables <- unique(
+                                                        c(clinical_variables,
+                                                          colnames(eval(as.symbol(i))[["clinical_data"]])
+                                                        )
+                                                 )
+                                }
+        
+}
+```
+
+
+Finding datasets with both the clinical and gene data
+```{r}
+available_datasets <- character()
+for (i in datasets) {
+     if(all(c("PTTG1","grade") %in% colnames(eval(as.symbol(i))[["data"]])
+            )
+        ) {
+        available_datasets <- unique(
+            c(available_datasets,
+              i
+              )
+        )
+    }
+}
+available_datasets
+```
+
+
+
 ```{r}
 Schmidt_M[["data"]] %>% 
     group_by(grade) %>% 

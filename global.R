@@ -7,8 +7,8 @@ library(stringr)
 
 ## load data
 #### call datasets
-datasets_load <- c( "~/Documents/Thesis/mgm_eda/datasets/GSE85135_Clark_V_KO.Rda",
-                    "~/Documents/Thesis/mgm_eda/datasets/GSE58037_Clark_V_KO.Rda",
+datasets_load <- c( "~/Documents/Thesis/mgm_eda/datasets/GSE85135_Clark_V_KO.Rda", # find all files in this directory to load rather than hard 
+                    "~/Documents/Thesis/mgm_eda/datasets/GSE58037_Clark_V_KO.Rda", # coding in the future
                     "~/Documents/Thesis/mgm_eda/datasets/GSE77259_Schulten_H_KO.Rda",
                     "~/Documents/Thesis/mgm_eda/datasets/GSE74385_Schmidt_M_KO.Rda",
                     "~/Documents/Thesis/mgm_eda/datasets/GSE54934_Torres-Martin_M_KO.Rda",
@@ -24,6 +24,14 @@ datasets_load <- c( "~/Documents/Thesis/mgm_eda/datasets/GSE85135_Clark_V_KO.Rda
 lapply(datasets_load, 
        load, 
        .GlobalEnv)
+
+#### master list - idea being create a master list to access rather than hardcoded thing
+# master_list <- list()
+# for (k in 1:length(datasets_load)){
+#     print(datasets_load[k])
+#     master_list[[k]] <- eval(as.symbol(load(datasets_load[k])))
+# }
+
 
 ## create choices
 
@@ -41,31 +49,32 @@ datasets <- c("Clark_V_2016",
               "Scheck_A"
 )
 
-#### variables across datasets
-variables <- c("age",       
-               "sex",          
-               "grade",        
-               "histology",    
-               "type",        
-               "location",     
-               "mib1_index",   
-               "recurrence",   
-               "recurrence_yrs", 
-               "recurrence_freq", 
-               "followup_days",
-               "survival_yrs",
-               "tissue",       
-               "progression",  
-               "radiation",   
-               "rna_integrity"
-)
+#### variables across datasets  ** depreicated **
+# variables <- c("age",       
+#                "sex",          
+#                "grade",        
+#                "histology",    
+#                "type",        
+#                "location",     
+#                "mib1_index",   
+#                "recurrence",   
+#                "recurrence_yrs", 
+#                "recurrence_freq", 
+#                "followup_days",
+#                "survival_yrs",
+#                "tissue",       
+#                "progression",  
+#                "radiation",   
+#                "rna_integrity"
+# )
 
 #### genes by which to analyze
-gene <- c("NEUROD1",
-           "PAX4",
-           "INSM1",
-           "NKX2-2",
-           "NEUROG3",
-           "PTTG1",
-           "F3"
-)
+gene <- character()                                                     # create an empty character vector
+for (p in datasets) {
+    gene <- unique(
+        c(gene, 
+          colnames(eval(as.symbol(p))[["expression_data"]])
+        )
+    )
+}
+
