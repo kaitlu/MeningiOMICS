@@ -46,8 +46,8 @@ server <- function(input, output) {
     
     variance <- reactive({
                           aov(data = datasetInput()[["data"]],            # aov, call the dataset
-                                 formula = as.formula(paste0(input$gene,    # formula to take gene input
-                                                             "~",           # interpret grade as variable
+                                 formula = as.formula(paste0(input$gene,  # formula to take gene input
+                                                             "~",         # interpret grade as variable
                                                              input$grouping
                                  )))
                     })

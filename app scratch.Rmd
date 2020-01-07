@@ -1,0 +1,45 @@
+---
+title: "testing"
+author: "Kaitlyn O'Shea"
+date: "12/16/2019"
+output: html_document
+---
+
+```{r}
+Schmidt_M[["data"]] %>% 
+    group_by(grade) %>% 
+    summarize(mean = mean(PTTG1), 
+               median = median(PTTG1), 
+               sd = sd(PTTG1)
+    )
+```
+
+```{r}
+d <- c("a")
+
+parse(text =  d)
+deparse(substitute(d))
+
+library(rlang)
+
+str(d)
+d
+
+eval(parse(text=d))
+cat(d)
+
+cat("print this without quotes")
+```
+
+```{r}
+        groupingInput <- reactive({
+                                  parse(text = input$grouping)
+                                 })
+        geneInput <- reactive({
+                                  parse(text = input$gene)
+                                })
+```
+
+ 
+
+

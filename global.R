@@ -10,7 +10,7 @@ library(stringr)
 datasets_load <- c( "~/Documents/Thesis/mgm_eda/datasets/GSE85135_Clark_V_KO.Rda",
                     "~/Documents/Thesis/mgm_eda/datasets/GSE58037_Clark_V_KO.Rda",
                     "~/Documents/Thesis/mgm_eda/datasets/GSE77259_Schulten_H_KO.Rda",
-                    "~/Documents/Thesis/mgm_eda/datasets/GSE74385_Schmidt_M_KO.Rda"#,
+                    "~/Documents/Thesis/mgm_eda/datasets/GSE74385_Schmidt_M_KO.Rda",
                     "~/Documents/Thesis/mgm_eda/datasets/GSE54934_Torres-Martin_M_KO.Rda",
                     "~/Documents/Thesis/mgm_eda/datasets/GSE55609_Yeh_T_KO.Rda",
                     "~/Documents/Thesis/mgm_eda/datasets/GSE16156_DUrso_O_KO.Rda",
@@ -66,5 +66,6 @@ gene <- c("NEUROD1",
            "INSM1",
            "NKX2-2",
            "NEUROG3",
-           "PTTG1"
+           "PTTG1",
+           "F3"
 )
