@@ -54,6 +54,20 @@ for (i in datasets) {
 available_datasets
 ```
 
+finding total number of genes in each dataset
+```{r}
+gene_count <- numeric()
+for (i in datasets) {
+    gene_count <- c(gene_count,
+                    dim(eval(as.symbol(i))[["expression_data"]]),
+    print(i)
+                    )
+}
+```
+``` {r}
+gene_count
+```
+
 
 
 ```{r}

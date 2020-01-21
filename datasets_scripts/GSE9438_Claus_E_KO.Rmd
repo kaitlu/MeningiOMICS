@@ -78,16 +78,16 @@ rowsd <- function(x) {
 
 ## keep only the probe with greatest variability across tumors as rna variable and gene names
 gse9438_rna <-
-               bind_cols(gse9438_feature["Gene symbol"], gse9438_exprs) %>% # add gene name to expression data
-               rename("gene" = "Gene symbol") %>%                             # rename name variable as 'gene' 
-               filter(gene != "") %>%                                         # keep only data for named genes
-               mutate(sd = rowsd(.[,-1])) %>%                                 # calculate sd for each probe, index out gene name
-               group_by(gene) %>%                                             # group probes by gene
-               filter(sd == max(sd)) %>%                                      # keep the probe with the max variation for each gene
-               ungroup() %>%                                                  # ungroup by genes 
-               select(-sd) %>%                                                # select all but sd column
-               pivot_longer(-gene,                                            # do not group by gene 
-                            names_to = "geo_accession",                       # 'key' via gather
+               bind_cols(gse9438_feature["Gene symbol"], gse9438_exprs) %>%    # add gene name to expression data
+               rename("gene" = "Gene symbol") %>%                              # rename name variable as 'gene' 
+               filter(gene != "") %>%                                          # keep only data for named genes
+               mutate(sd = rowsd(.[,-1])) %>%                                  # calculate sd for each probe, index out gene name
+               group_by(gene) %>%                                              # group probes by gene
+               filter(sd == max(sd)) %>%                                       # keep the probe with the max variation for each gene
+               ungroup() %>%                                                   # ungroup by genes 
+               select(-sd) %>%                                                 # select all but sd column
+               pivot_longer(-gene,                                             # do not group by gene 
+                            names_to = "geo_accession",                        # 'key' via gather
                             values_to = "value") %>%                          
                 mutate("logvalue" = log2(value)) %>%                           # log2 transform expression for variance stabilization 
                 group_by(gene) %>%                                             # standardize for cross data set comparison

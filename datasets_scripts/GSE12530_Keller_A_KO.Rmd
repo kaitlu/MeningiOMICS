@@ -104,11 +104,11 @@ gse12530_rna <-
                pivot_longer(-gene,                                            # do not group by gene 
                             names_to = "geo_accession",                       # 'key' via gather
                             values_to = "value") %>%                          
-                mutate("standardized" = (value - mean(value))/           # center at mean for gene 
-                                         sd(value),                         # scale by sd for gene
+                mutate("standardized" = (value - mean(value))/                # center at mean for gene 
+                                         sd(value),                           # scale by sd for gene
                        ) %>%
                 ungroup() %>%                                                  # ungroup by genes 
-                select(-value) %>%                                  # select all but sd column
+                select(-value) %>%                                             # select all but sd column
                 pivot_wider(names_from = "gene",                               # final format genes as rows
                             values_from = "standardized")                      # final format expression across accession as columns    
 ```
@@ -158,5 +158,7 @@ Keller_A <- list(
                  )                
 ```
 ```{r}
-save(Keller_A, file = "~/Documents/Thesis/mgm_eda/datasets/GSE12530_Keller_A_KO.Rda") 
+getwd()
+setwd
+save(Keller_A, file = "~./GSE12530_Keller_A_KO.Rda") 
 ```

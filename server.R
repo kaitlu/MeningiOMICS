@@ -1,17 +1,20 @@
 ## server logic
 server <- function(input, output, session) {
     
+    
+## anova and plots
+    
     ## find available clinical variables for selected gene
     cv <- reactive({
               clinical_variables <- character()
               for (i in datasets) {
               if(input$gene %in% colnames(eval(as.symbol(i))[["expression_data"]])) {
-                 clinical_variables <- unique(
-                                              c(clinical_variables,
-                                                colnames(eval(as.symbol(i))[["clinical_data"]])
+                clinical_variables <- sort(unique(
+                                                  c(clinical_variables,
+                                                    colnames(eval(as.symbol(i))[["clinical_data"]])
+                                                    )
                                                 )
-                                              )      
-                 }
+                 )}
               }
               return(clinical_variables)
     })
@@ -25,7 +28,7 @@ server <- function(input, output, session) {
                       )
     })
         
-    ## find the available clinical variables for selected gene and clinical data in UI
+    ## find the available datasets for selected gene and clinical data in ANOVA UI
     ad <- reactive({
         available_datasets <- character()
         for (i in datasets) {
@@ -33,17 +36,17 @@ server <- function(input, output, session) {
                      input$grouping) %in% colnames(eval(as.symbol(i))[["data"]])
                     )
             ) {
-                available_datasets <- unique(
-                    c(available_datasets,
-                      i
-                    )
-                )
-            }
+                available_datasets <- sort(unique(
+                                                  c(available_datasets,
+                                                    i
+                                                    )
+                                                )
+                )}
         }
         return(available_datasets)
     })
     
-    ## populate the available clinical variables for selected gene and clinical data
+    ## populate the available datasets for selected gene and clinical data
     observe({
         updateSelectizeInput(session,
                           inputId = "dataset",
@@ -67,7 +70,6 @@ server <- function(input, output, session) {
     })
 
 
-
     ## provide summary statistics over gene
     output$summary <- renderTable({
         validate(
@@ -79,35 +81,38 @@ server <- function(input, output, session) {
                         group_by(!!grp()) %>%
                         summarize(mean = mean(!!gv()),
                                   median = median(!!gv()),
-                                  sd = sd(!!gv())
+                                  sd = sd(!!gv()),
+                                  total = n()
                                 )
         summ
     })
 
-    output$graph <- renderPlot({
+    output$graph <- renderPlotly({
         validate(
             need(input$gene != '', 'Please choose a gene.'),
             need(input$grouping != '', 'Please choose a clinical variable.'),
             need(input$dataset != '', "Please choose a dataset")
         )
         ## Visualize expression values across grade
-        ggplot(data = datasetInput()[["data"]],
-               aes(x = !!grp(),
-                   y = !!gv())
-               ) +
-            geom_boxplot() +
-            geom_jitter(width = .25,
-                        color = "#0072B2") +             # accessible blue
-            theme_bw() +
-            ggtitle("Expression by WHO Grade") +
-            xlab("WHO Grade") +
-            ylab("Expression") +
-            stat_summary(fun.y=mean,                      # add in a blue dashed line at the mean
-                         geom = "errorbar",
-                         aes(ymax = ..y.., ymin = ..y..),
-                         width = .75,
-                         linetype = "dashed",
-                         color = "#0072B2")
+         ggplotly(
+             ggplot(data = datasetInput()[["data"]],
+                    aes(x = !!grp(),
+                        y = !!gv())
+                    ) +
+             geom_boxplot() +
+             geom_jitter(width = .25,
+                         color = "#0072B2") +                        # accessible blue
+             theme_bw() +
+             ggtitle(paste(input$gene,"RNA Expression by",input$grouping)) +    # label plot to what clinical variable is shown 
+             xlab(input$grouping) +                                  # x axis grouping variable
+             ylab(paste(input$gene,"Expression (log2)")) +                  # y axis gene 
+             stat_summary(fun.y=mean,                                # add in a blue dashed line at the mean
+                          geom = "errorbar",
+                          aes(ymax = ..y.., ymin = ..y..),
+                          width = .75,
+                          linetype = "dashed",
+                          color = "#E69F00")
+            )
           })
 
     variance <- reactive({
@@ -144,5 +149,88 @@ server <- function(input, output, session) {
                                 },
                                 rownames = TRUE)
 
+## correlation plots
+    
+    ## find genes available based on initially selected gene
+    g2 <- reactive({
+            second_gene <- character()
+            for (i in datasets) {
+                                 if(input$gene %in% colnames(eval(as.symbol(i))[["expression_data"]])) {
+                                       second_gene <- sort(unique(
+                                                                  c(second_gene,
+                                                                    colnames(eval(as.symbol(i))[["expression_data"]])
+                                                                    )
+                                                                )
+                                       )
+            }
+        }
+        return(second_gene)
+    })
+    
+    ## populate the available second genes for initially selected gene in UI
+    observe({
+        updateSelectizeInput(session,
+                             inputId = "gene2",
+                             label = NULL,
+                             choices = g2()
+        )
+    })
+    
+    
+    ## find the available datasets for selected pairwise genes in correlation UI
+    cd <- reactive({
+        available_datasets_correlation <- character()
+        for (i in datasets) {
+                            if(all(c(input$gene, input$gene2) %in% colnames(eval(as.symbol(i))[["data"]])
+                                    )
+                                ) {
+                                    available_datasets_correlation <- sort(unique(
+                                                                                  c(available_datasets_correlation,
+                                                                                    i
+                                                                                    )
+                                                                                )
+                                    )
+            }
+        }
+        return(available_datasets_correlation)
+    })
+    
+    ## populate the available datasets for selected gene pair
+    observe({
+        updateSelectizeInput(session,
+                             inputId = "dataset_correlation",
+                             label = NULL,
+                             choices = cd()
+        )
+    })
+    
+    ## pull out gene2
+    gv2 <- reactive({as.symbol(input$gene2)
+    })
+    
+    ## pull out dataset
+    dataset_correlationInput <- reactive({
+        eval(as.symbol(input$dataset_correlation))
+    })
+    
+    output$correlation_plot <- renderPlotly({
+        validate(
+            need(input$gene != '', 'Please choose a gene.'),
+            need(input$gene2 != '', 'Please choose a gene to compare.'),
+            need(input$dataset_correlation != '', "Please choose a dataset")
+        )
+                                        ggplotly(
+                                             ggplot(data = dataset_correlationInput()[["data"]],
+                                                    aes(x = !!gv(),
+                                                        y = !!gv2()
+                                                        )
+                                                     )+
+                                              geom_point(color = "#0072B2") + 
+                                              theme_bw() +
+                                              ggtitle(paste("RNA Expression of",input$gene,"vs.",input$gene2)) + #title pairwise
+                                              xlab(paste(input$gene,"Expression (log2)")) +                      #x axis gene
+                                              ylab(paste(input$gene2,"Expression (log2)"))                       #y axis gene
+                                             )
+        })
     }
 

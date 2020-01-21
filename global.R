@@ -4,6 +4,7 @@ library(dplyr)
 library(car)
 library(shiny)
 library(stringr)
+library(plotly)
 
 ## load data
 #### call datasets
@@ -35,17 +36,17 @@ lapply(datasets_load,
 
 ## create choices
 
-#### datasets
+### datasets
 datasets <- c("Clark_V_2016", 
-              "Clark_V", 
-              "Schulten_H", 
-              "Schmidt_M", 
-              "TorresMartin_M", 
-              "Yeh_T", 
-              "DUrso_O", 
-              "Lee_Y", 
-              "Keller_A", 
-              "Claus_E", 
+              "Clark_V",
+              "Schulten_H",
+              "Schmidt_M",
+              "TorresMartin_M",
+              "Yeh_T",
+              "DUrso_O",
+              "Lee_Y",
+              "Keller_A",
+              "Claus_E",
               "Scheck_A"
 )
 
@@ -69,12 +70,13 @@ datasets <- c("Clark_V_2016",
 # )
 
 #### genes by which to analyze
-gene <- character()                                                     # create an empty character vector
-for (p in datasets) {
-    gene <- unique(
-        c(gene, 
-          colnames(eval(as.symbol(p))[["expression_data"]])
+gene <- character()                      # create an empty character vector
+for (p in datasets) {                    # loop to look through datasets for all available genes
+    gene <- sort(unique(                 # assign unique gene    names to the character vector
+        c(gene,                       
+          colnames(eval(as.symbol(p))[["expression_data"]]) # look through the expression sets for the available genes in each
         )
+    )
     )
 }
 

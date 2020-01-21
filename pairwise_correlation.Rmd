@@ -1,0 +1,31 @@
+---
+title: "Pairwise gene correlation"
+author: "Kaitlyn O'Shea"
+date: "1/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## pairwise correlation
+
+## use Schmidt_M
+
+```{r}
+load( "~/Documents/Thesis/mgm_eda/datasets/GSE74385_Schmidt_M_KO.Rda")
+sm <- Schmidt_M[["data"]]
+```
+
+## create plots
+
+```{r}
+ggplot(data = sm, 
+       aes(x = PTTG1,
+           y = A2M)
+       ) +
+    geom_point() + 
+    theme_bw()
+```
+

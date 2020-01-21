@@ -42,7 +42,8 @@ summ <- schm %>%
                 group_by(grade) %>% 
                                     summarize(mean = mean(PTTG1), 
                                               median = median(PTTG1), 
-                                              sd = sd(PTTG1)
+                                              sd = sd(PTTG1),
+                                              total = n()
                                               )
 summ
 
