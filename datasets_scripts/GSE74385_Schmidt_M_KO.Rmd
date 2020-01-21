@@ -21,6 +21,7 @@ BiocManager::install("GEOquery")
 ## libraries needed
 library("tidyverse")
 library("GEOquery")
+library("here")
 ```
 
 ## Get GSE74385 from GEO
@@ -164,5 +165,5 @@ Schmidt_M <- list(
 ```
 
 ```{r}
-save(Schmidt_M, file = "~/Documents/Thesis/mgm_eda/datasets/GSE74385_Schmidt_M_KO.Rda") 
+save(Schmidt_M, file = here("datasets","GSE74385_Schmidt_M_KO.Rda")) 
 ```

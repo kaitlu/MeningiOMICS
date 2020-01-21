@@ -22,6 +22,7 @@ BiocManager::install("GEOquery")
 ## libraries needed
 library("tidyverse")
 library("GEOquery")
+library("here")
 ```
 
 ## Get GSE16156 from GEO
@@ -157,5 +158,5 @@ DUrso_O <- list(
                    )
 ```
 ```{r}
-save(DUrso_O, file = "~/Documents/Thesis/mgm_eda/datasets/GSE16156_DUrso_O_KO.Rda") 
+save(DUrso_O, file = here("datasets","GSE16156_DUrso_O_KO.Rda")) 
 ```

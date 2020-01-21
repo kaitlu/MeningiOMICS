@@ -22,6 +22,7 @@ BiocManager::install("GEOquery")
 ## libraries needed
 library("tidyverse")
 library("GEOquery")
+library("here")
 ```
 
 ## Get GSE12530 from GEO
@@ -158,7 +159,5 @@ Keller_A <- list(
                  )                
 ```
 ```{r}
-getwd()
-setwd
-save(Keller_A, file = "~./GSE12530_Keller_A_KO.Rda") 
+save(Keller_A, file = here("datasets","GSE12530_Keller_A_KO.Rda")) 
 ```
