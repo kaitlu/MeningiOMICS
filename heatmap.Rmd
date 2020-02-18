@@ -1,0 +1,55 @@
+---
+title: "Heatmap Proof of Concept"
+author: "Kaitlyn O'Shea"
+date: "2/3/2020"
+output: html_document
+---
+
+```{r}
+library(heatmaply)
+load("datasets/GSE74385_Schmidt_M_KO.Rda")
+```
+
+
+```{r}
+schm_clin <- Schmidt_M[["clinical_data"]]
+grade <- schm_clin %>% select(grade)
+
+schm <- Schmidt_M[["expression_data"]]
+schm2 <- schm[, -1]
+
+schm3 <- schm2 %>% select(NEUROD1,PAX4,INSM1,"NKX2-2",NEUROG3)
+schm4 <- schm2 %>% select(PTTG1, A2M, F3, FGFR1, FGF4, NF1, NF2, TP53, EGFR, IDH1, IDH2, TERT, HNF1A)
+
+## euchlidean distance matrix
+d <- dist(schm3, method = "euclidean")
+
+## dendrogram
+cluster <- hclust(d)
+plot(cluster)
+```
+
+
+```{r}
+## heatmap
+heatmaply(
+   # colors = Purples,
+  schm3,
+  RowSideColors = grade#,
+  #row_side_palette = ,
+  #Rowv = grade
+)
+```
+
+
+
+```{r}
+## heatmap
+heatmaply(
+  schm4,
+  color = Purples,
+  RowSideColors = grade#c,
+ # Rowv = grade
+)
+```
+

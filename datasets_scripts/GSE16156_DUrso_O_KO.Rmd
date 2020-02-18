@@ -13,8 +13,9 @@ knitr::opts_chunk$set(echo = TRUE,
 
 ```{r install_packages, eval = FALSE}
 ## require BioManager
-if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
+if (!requireNamespace(c("BiocManager", "here"),  quietly = TRUE))
+    install.packages("BiocManager",
+                     "here")
 BiocManager::install("GEOquery") 
 ```
 

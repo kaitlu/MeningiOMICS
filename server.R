@@ -21,10 +21,11 @@ server <- function(input, output, session) {
     
     ## populate the available clinical variables for selected gene in UI
     observe({
-        updateSelectizeInput(session,
+        updateSelectizeInput(session = session,
                       inputId = "grouping",
                       label = NULL,
-                      choices = cv()
+                      choices = cv(),
+                      server = TRUE
                       )
     })
         

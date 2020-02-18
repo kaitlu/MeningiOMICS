@@ -5,6 +5,7 @@ library(car)
 library(shiny)
 library(stringr)
 library(plotly)
+library(shinythemes)
 
 ## load data
 #### call datasets
@@ -19,7 +20,7 @@ datasets_load <- c( "datasets/GSE85135_Clark_V_KO.Rda", # find all files in this
                     "datasets/GSE12530_Keller_A_KO.Rda",
                     "datasets/GSE9438_Claus_E_KO.Rda",
                     "datasets/GSE4780_Scheck_A_KO.Rda"
-                   )
+                   ) # load only some versus the others - add toggle (look into)
 
 #### load datasets
 lapply(datasets_load, 
