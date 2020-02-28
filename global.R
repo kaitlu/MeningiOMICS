@@ -6,6 +6,7 @@ library(shiny)
 library(stringr)
 library(plotly)
 library(shinythemes)
+library(DT)
 
 ## load data
 #### call datasets
@@ -51,24 +52,6 @@ datasets <- c("Clark_V_2016",
               "Scheck_A"
 )
 
-#### variables across datasets  ** depreicated **
-# variables <- c("age",       
-#                "sex",          
-#                "grade",        
-#                "histology",    
-#                "type",        
-#                "location",     
-#                "mib1_index",   
-#                "recurrence",   
-#                "recurrence_yrs", 
-#                "recurrence_freq", 
-#                "followup_days",
-#                "survival_yrs",
-#                "tissue",       
-#                "progression",  
-#                "radiation",   
-#                "rna_integrity"
-# )
 
 #### genes by which to analyze
 gene <- character()                      # create an empty character vector
