@@ -6,7 +6,7 @@ tabPanel(title = "Multigene Analysis",
                  
                  helpText("Multigene Analyis and visualization of RNA expression"),
                  
-                 conditionalPanel(condition="input.tabselected==1",   # sidebar panel for when anova tab is selected
+               #  conditionalPanel(condition="input.tabselected==1",   # sidebar panel for when anova tab is selected
                                   
                                   
                                   ## feild for users to paste in selections 
@@ -40,7 +40,7 @@ tabPanel(title = "Multigene Analysis",
                                                  )
                                   )
                                  
-                 )
+                 #) # goes with conditional panel
                  
                  # (inputId = "gene_user_input",
                  #                label = "Gene",
@@ -70,7 +70,8 @@ tabPanel(title = "Multigene Analysis",
                     ),
                     
                     tabPanel(title = "Heatmap and Hierarchial Clustering of Gene Expression by Clinical Variables",
-                             value = 2
+                             value = 2,
+                             plotlyOutput("heatmap")
                     ),
                     
                     id = "tabselected" 

@@ -7,6 +7,7 @@ library(stringr)
 library(plotly)
 library(shinythemes)
 library(DT)
+library(heatmaply)
 
 ## load data
 #### call datasets

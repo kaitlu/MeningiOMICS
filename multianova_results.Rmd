@@ -127,15 +127,23 @@ multianova_table <- do.call(rbind, multianova_out)
 
 ```{r}
 genes3 <- "EGFR,NF1,TP53,A2M,PTTG1,NF2,PTEN"
-l <- as.list(strsplit(genes3,split =",")[[1]])
+l <- as.list(strsplit(genes3,split =","))[[1]])
+
+as.character(strsplit(genes3, spli))
 s <- lapply(l, as.symbol)
 ```
 ```{r}
-all(c(c(strsplit(genes3,split =",")[[1]]),"grade") %in% colnames(Schmidt_M[["data"]]))
+all(c(as.character(strsplit(genes3,split =",")[[1]]),"grade") %in% colnames(Schmidt_M[["data"]]))
 ```
 ```{r}
 Lee_Y[["expression_data"]]$`LEPROT///LEPR`
 
 Lee_Y[["data"]]$LEPR
+```
+```{r}
+as.character(c(strsplit(genes3,split =",")[[1]]))
+
+p <- as.character(l)
+str(p)
 ```
 

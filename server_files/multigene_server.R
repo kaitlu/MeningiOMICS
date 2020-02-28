@@ -94,13 +94,19 @@
          as.symbol)                           # need the gene name unquoted
       )
       
+      ## create reactive variable for clinical variable
+      cvui <- reactive({as.symbol(input$multi_grouping)})
+      
+      ## create reactive variable for dataset
+      dui <- reactive({eval(as.symbol(input$multi_dataset))})
+      
       ## output results from user input gene list to an object
-      multianova_out <-reactive(invisible                          # prevent lapply from printing
-                                (lapply(                           # use user list and apply function
+      multianova_out <-reactive(invisible(                          # prevent lapply from printing
+                                lapply(                           # use user list and apply function
                                    gui(),                         # created reactive variable list 
-                                   FUN = multi_anova,             # function is the multi_anova
-                                   clinical_variable = "grade",   # over selected clincal variable of interest
-                                   dataset = Schmidt_M[["data"]]  # in selected dataset
+                                   FUN = multi_anova,                          # function is the multi_anova
+                                   clinical_variable = input$multi_grouping,   # over selected clincal variable of interest
+                                   dataset = dui()[["data"]]  # in selected dataset
                                 )
                                 )
       )
@@ -123,4 +129,14 @@
          datatable(multianova_table())
       })
       
-       
+      
+      
+   
+      
+      #### heatmap
+  
+      output$heatmap <- renderPlotly({
+                                                heatmaply(x = dui()[["data"]] %>% select(as.character(strsplit(input$gene_user_input, split =",")[[1]])),
+                                                          RowSideColors = dui()[["data"]] %>% select(input$multi_grouping)
+                                                          )
+      })
