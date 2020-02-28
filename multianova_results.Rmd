@@ -1,0 +1,125 @@
+---
+title: "ANOVA table"
+author: "Kaitlyn O'Shea"
+date: "2/26/2020"
+output: html_document
+---
+
+## Proof of Concept for conducting ANOVA across selected clinical variable and output significant results
+
+```{r}
+library()
+```
+
+```{r}
+# use schmidt for example
+load("~/Documents/Thesis/mgm_eda/datasets/GSE74385_Schmidt_M_KO.Rda")
+```
+
+```{r}
+# extract gene names
+a <- as.list(colnames(Schmidt_M[["expression_data"]])[-1])
+```
+
+
+```{r}
+## baseline test extraction
+summary(aov(PTTG1 ~ grade, data = Schmidt_M[["data"]]))[[1]]$'Pr(>F)'[1]
+```
+
+### Testing
+This chunk helped me to understand the behavior of the dashes and how R natively fixes the column call when directly referencing the data set but not when using variables in the aov statement
+```{r}
+multi_anova2 <- function(gene, clinical_variable, dataset) {
+                                         
+    aov <- summary(aov(data = dataset,                           # aov, call the dataset
+                                                            formula = (gene         # formula to take gene input
+                                                                                    ~
+                                                                                    clinical_variable # over clinical variables
+                                                                                    )
+                                                                              )  
+                                                            
+                                                        )
+                                      print(aov)                                                # print aov 
+}
+
+multi_anova2(Schmidt_M[["data"]]$`WI2-2373I1.2`, Schmidt_M[["data"]]$grade, Schmidt_M[["data"]])
+
+```
+
+
+## This chunk was used to prove that the anova would execute over all gene names in the dataset
+```{r}
+# for (i in c(1:length(a))) {
+#              aov(data = Schmidt_M[["data"]],                           # aov, call the dataset
+#                 formula = as.formula(paste0("`",(a[i]),"`",         # formula to take gene input
+#                                             "~",
+#                                             "grade" # over clinical variables
+#                                     )
+#                 )
+#                 )
+#     if (i%%100==0){print(i)}
+# }
+```
+
+## Formula for functional (app) use
+
+```{r}
+multi_anova <- function(gene, clinical_variable, dataset) {
+                                          aov <- summary(aov(data = dataset,                           # aov, call the dataset
+                                                            # need the quoted backhashes around gene to read "irregular" column/gene names
+                                                            formula = as.formula(paste0("`",(gene),"`",  
+                                                                                    "~",
+                                                                                    clinical_variable # over clinical variables
+                                                                                    )
+                                                                              )  
+                                                            )
+                                                        )
+                                           anova_pvalue <- data.frame(gene_name = as.character(gene), # gene name
+                                                                      `p adj` = aov[[1]]$'Pr(>F)'[1]  # extracted p-value
+                                                                      ) 
+                                          anova_pvalue
+}
+
+multi_anova("PTTG1", "grade", Schmidt_M[["data"]])
+multi_anova("WI2-2373I1.2", "grade", Schmidt_M[["data"]])
+```
+
+```{r}
+X <- multi_anova("PTTG1", "grade", Schmidt_M[["data"]])
+str(X)
+```
+
+
+```{r}
+genes <- c("EGFR", "NF1", "TP53", "A2M", "PTTG1", "NF2", "PTEN")
+```
+
+
+```{r}
+out <- invisible(lapply(genes, multi_anova, clinical_variable = "grade", dataset = Schmidt_M[["data"]]))
+do.call(rbind,out)
+```
+
+## Putting it all together
+```{r}
+multi_anova <- function(gene, clinical_variable, dataset) {
+                                          aov <- summary(aov(data = dataset,                           # aov, call the dataset
+                                                            # need the quoted backhashes around gene to read "irregular" column/gene names
+                                                            formula = as.formula(paste0("`",(gene),"`",  
+                                                                                    "~",
+                                                                                    clinical_variable # over clinical variables
+                                                                                    )
+                                                                              )  
+                                                            )
+                                                        )
+                                           anova_pvalue <- data.frame(gene_name = as.character(gene), # gene name
+                                                                      `p adj` = aov[[1]]$'Pr(>F)'[1]  # extracted p-value
+                                                                      ) 
+                                          anova_pvalue
+}
+
+multianova_out <- invisible(lapply(gene_user_input, multi_anova, clinical_variable = "grade", dataset = Schmidt_M[["data"]]))
+multianova_table <- do.call(rbind, multianova_out)
+```
+

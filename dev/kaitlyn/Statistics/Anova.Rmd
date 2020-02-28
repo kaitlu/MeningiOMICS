@@ -10,21 +10,22 @@ output: html_document
 library(ggplot2)
 library(dplyr)
 library(car)
+library(stringr)
 ```
 
 ## Load Datasets
 ```{r}
-load("~/Documents/Thesis/mgm_eda/datasets/GSE85135_Clark_V_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE58037_Clark_V_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE77259_Schulten_H_KO.Rda")
+# load("~/Documents/Thesis/mgm_eda/datasets/GSE85135_Clark_V_KO.Rda")
+# load("~/Documents/Thesis/mgm_eda/datasets/GSE58037_Clark_V_KO.Rda")
+# load("~/Documents/Thesis/mgm_eda/datasets/GSE77259_Schulten_H_KO.Rda")
 load("~/Documents/Thesis/mgm_eda/datasets/GSE74385_Schmidt_M_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE54934_Torres-Martin_M_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE55609_Yeh_T_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE16156_DUrso_O_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE16581_Lee_Y_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE12530_Keller_A_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE9438_Claus_E_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE4780_Scheck_A_KO.Rda")
+# load("~/Documents/Thesis/mgm_eda/datasets/GSE54934_Torres-Martin_M_KO.Rda")
+# load("~/Documents/Thesis/mgm_eda/datasets/GSE55609_Yeh_T_KO.Rda")
+# load("~/Documents/Thesis/mgm_eda/datasets/GSE16156_DUrso_O_KO.Rda")
+# load("~/Documents/Thesis/mgm_eda/datasets/GSE16581_Lee_Y_KO.Rda")
+# load("~/Documents/Thesis/mgm_eda/datasets/GSE12530_Keller_A_KO.Rda")
+# load("~/Documents/Thesis/mgm_eda/datasets/GSE9438_Claus_E_KO.Rda")
+# load("~/Documents/Thesis/mgm_eda/datasets/GSE4780_Scheck_A_KO.Rda")
 ```
 
 ## Proof of concept using GSE74385_Schmidt_M_KO.Rda
@@ -151,7 +152,7 @@ var_grade(gene = "PTTG1", dataset = schm)
 
 ## Now do it for more than one gene
 ```{r eval=FALSE, include=FALSE}
-R_HSA_210746 <- "NEUROD1;PAX4;INSM1;NKX2-2;NEUROG3"
+R_HSA_210746 <- "NEUROD1;PAX4;INSM1;NKX-2;NEUROG3"
 split_R_HSA_210746 <- str_split(R_HSA_210746,
                                 ";",
                                 simplify = T)
