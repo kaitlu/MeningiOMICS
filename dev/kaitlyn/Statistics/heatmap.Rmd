@@ -7,6 +7,7 @@ output: html_document
 
 ```{r}
 library(heatmaply)
+library(dplyr)
 load("datasets/GSE74385_Schmidt_M_KO.Rda")
 ```
 
@@ -33,14 +34,34 @@ plot(cluster)
 ```{r}
 ## heatmap
 heatmaply(
-   # colors = Purples,
   schm3,
-  RowSideColors = grade#,
-  #row_side_palette = ,
-  #Rowv = grade
-)
+  row_side_colors = data.frame(grade), fontsize_col = 10,fontsize_row = 8,
+  xlab = "Gene",
+  main = "Gene Expression Heatmap",
+  key.title = "Expression",
+  showticklabels = c(T,F)
+  ) 
 ```
 
+```{r}
+plot_ly(x = colnames(schm3),
+        y = grade,
+        
+  z = schm3,
+        type = "heatmap")
+```
+
+
+```{r}
+
+ggheatmap(  schm3,
+  row_side_colors = data.frame(grade), 
+  xlab = "Gene",
+  main = "Gene Expression Heatmap",
+  key.title = "Expression",
+  showticklabels = c(T,F)
+)
+```
 
 
 ```{r}
@@ -48,8 +69,8 @@ heatmaply(
 heatmaply(
   schm4,
   color = Purples,
-  RowSideColors = grade#c,
- # Rowv = grade
+  RowSideColors = grade,
+  Rowv = grade
 )
 ```
 

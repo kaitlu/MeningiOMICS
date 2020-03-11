@@ -121,29 +121,44 @@ multi_anova <- function(gene, clinical_variable, dataset) {
                                           anova_pvalue
 }
 
-multianova_out <- invisible(lapply(s, multi_anova, clinical_variable = "grade", dataset = Schmidt_M[["data"]]))
+multianova_out <- invisible(lapply(genes2, multi_anova, clinical_variable = "grade", dataset = Schmidt_M[["data"]]))
 multianova_table <- do.call(rbind, multianova_out)
+
+
 ```
+
+```{r}
+filtered <- multianova_table  %>% filter(p.adj<.05)
+gene_names <- as.character(filtered$gene_name)
+
+
+cat(paste(paste(gene_names), collapse=","))
+
+```
+
 
 ```{r}
 genes3 <- "EGFR,NF1,TP53,A2M,PTTG1,NF2,PTEN"
-l <- as.list(strsplit(genes3,split =","))[[1]])
+l <- as.list(strsplit(genes3,split =","))[[1]]
 
-as.character(strsplit(genes3, spli))
 s <- lapply(l, as.symbol)
 ```
+
 ```{r}
 all(c(as.character(strsplit(genes3,split =",")[[1]]),"grade") %in% colnames(Schmidt_M[["data"]]))
 ```
+
 ```{r}
 Lee_Y[["expression_data"]]$`LEPROT///LEPR`
 
 Lee_Y[["data"]]$LEPR
 ```
+
 ```{r}
 as.character(c(strsplit(genes3,split =",")[[1]]))
 
 p <- as.character(l)
 str(p)
+
 ```
 

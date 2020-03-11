@@ -4,9 +4,9 @@ tabPanel(title = "Multigene Analysis",
              
              sidebarPanel(
                  
-                 helpText("Multigene Analyis and visualization of RNA expression"),
+                 helpText("Multigene Analysis and Visualization of RNA expression"),
                  
-               #  conditionalPanel(condition="input.tabselected==1",   # sidebar panel for when anova tab is selected
+                 conditionalPanel(condition="input.panelselected==1",   # sidebar panel for when anova tab is selected
                                   
                                   
                                   ## feild for users to paste in selections 
@@ -40,7 +40,7 @@ tabPanel(title = "Multigene Analysis",
                                                  )
                                   )
                                  
-                 #) # goes with conditional panel
+                 ), # goes with conditional panel
                  
                  # (inputId = "gene_user_input",
                  #                label = "Gene",
@@ -57,6 +57,39 @@ tabPanel(title = "Multigene Analysis",
                  #                )
                  # ),
                  
+                 conditionalPanel(condition="input.panelselected==2",   # sidebar panel for when anova tab is selected
+                                  
+                                  ## feild for users to paste in selections 
+                                  textInput(inputId = "significant_gene_user_input",
+                                            label = "Genes",
+                                            value = NULL,
+                                            placeholder = 'Please paste a comma seperated list of genes of interest'
+                                  ),
+                                  
+                                  
+                                  ## select clinical variable to group by
+                                  selectizeInput(inputId = "significant_multi_grouping",
+                                                 label = "Select variable to analyze",
+                                                 choices = NULL,
+                                                 selected = NULL,
+                                                 options = list(
+                                                     placeholder = 'Please select an option below',
+                                                     onInitialize = I('function() { this.setValue(""); }')
+                                                 )
+                                  ),
+                                  
+                                  ## select dataset to analyze
+                                  selectizeInput("significant_multi_dataset",
+                                                 label = "Select a dataset", 
+                                                 choices = NULL,
+                                                 selected = NULL,
+                                                 options = list(
+                                                     placeholder = 'Please select an option below',
+                                                     onInitialize = I('function() { this.setValue(""); }')
+                                                 )
+                                  )
+                 )
+                 
              ),
                  
     mainPanel(
@@ -64,9 +97,25 @@ tabPanel(title = "Multigene Analysis",
         ## tabs to display
         tabsetPanel(type = "tabs",
                     
-                    tabPanel(title = "Results of Multigene Anova",    ## create tab for multiple anovas table out put
+                    tabPanel("Multigene Anova",            ## create tab for multiple anovas table out put
                              value = 1,                               ## multi anova tab value = 3
-                             dataTableOutput("multianova_results")     ## output results of multiple
+                             h3(textOutput("multianova_results_title")),
+                             dataTableOutput("multianova_results"),   ## output results of multiple
+                             
+                             ## horizonal line
+                             hr(),
+                             
+                             ## put the following on the same row
+                             fluidRow(
+                                 
+                                 ## create space for summary table
+                                 column(12,
+                                        h3(textOutput("signficant_list_title")),
+                                        "Copy Genes Below For Use in the Heatmap Tab",
+                                        code(textOutput("significant_list"))
+                                        
+                                 )
+                             )
                     ),
                     
                     tabPanel(title = "Heatmap and Hierarchial Clustering of Gene Expression by Clinical Variables",
@@ -74,7 +123,7 @@ tabPanel(title = "Multigene Analysis",
                              plotlyOutput("heatmap")
                     ),
                     
-                    id = "tabselected" 
+                    id = "panelselected" 
                     )
     ),
              

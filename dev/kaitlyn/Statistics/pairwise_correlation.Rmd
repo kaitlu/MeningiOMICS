@@ -29,3 +29,17 @@ ggplot(data = sm,
     theme_bw()
 ```
 
+
+## create spearman correlation
+```{r}
+a <- cor.test(sm$PTTG1, sm$A2M, method = "spearman")
+cor.test(formula = ~PTTG1 + A2M, data = sm, method = "spearman")
+a$estimate[[1]]
+a$p.value
+```
+
+```{r}
+z <- as.data.frame(cbind(a$estimate[[1]], a$p.value))
+names(z) <- c("rho", "p-value")
+```
+

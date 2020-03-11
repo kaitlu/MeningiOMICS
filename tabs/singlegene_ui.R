@@ -72,7 +72,7 @@ tabPanel(title = "Single Gene Analysis",
             ## tabs to display
             tabsetPanel(type = "tabs",
                         
-                        tabPanel(title = "Anova",             ## create tab for Anova visuals
+                        tabPanel(title = "ANOVA",             ## create tab for Anova visuals
                                  value = 1,
                                  plotlyOutput("graph"), 
                                  
@@ -91,7 +91,7 @@ tabPanel(title = "Single Gene Analysis",
                                      
                                      ## create space for anova results
                                      column(4,
-                                            "Anova",
+                                            "ANOVA",
                                             tableOutput("anova")
                                             
                                      ),
@@ -103,13 +103,25 @@ tabPanel(title = "Single Gene Analysis",
                                             
                                      )
                                  )
-                        ),
-                        tabPanel("Correlation", 
+                            ),
+                        tabPanel(title = "Pairwise Gene Expression Correlation", 
                                  value = 2,
-                                 plotlyOutput("correlation_plot")
+                                 plotlyOutput("correlation_plot"),
+                                 
+                                 ## horizonal line
+                                 hr(),
+                                 
+                                 fluidRow(
+                                     column(4,
+                                         "Spearman's Rank Correlation Coefficient",
+                                         tableOutput("correlation_table")
+                                     )
+                                 )
                         ),
+                        
                         id = "tabselected"                   ## id for these tabpanel values
             )
+            
         ),
         position = "left",
         fluid = TRUE

@@ -1,5 +1,5 @@
 ---
-title: "Table One"
+title: ""
 output:
   html_document: 
     theme: flatly
@@ -130,6 +130,7 @@ table1(data = tableone_meningioma,
        )
 
 ```
+
 
 
 

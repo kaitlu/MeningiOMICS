@@ -7,14 +7,14 @@
               clinical_variables <- character()
               for (i in datasets) {
               if(input$gene %in% colnames(eval(as.symbol(i))[["expression_data"]])) {
-                clinical_variables <- sort(unique(
+                clinical_variables <- 
                                                   c(clinical_variables,
                                                     colnames(eval(as.symbol(i))[["clinical_data"]])
-                                                    )
-                                                )
+                                      
+                                                
                  )}
               }
-              return(clinical_variables)
+              return(sort(unique(clinical_variables)))
     })
     
     ## populate the available clinical variables for selected gene in UI
@@ -22,8 +22,7 @@
         updateSelectizeInput(session = session,
                       inputId = "grouping",
                       label = NULL,
-                      choices = cv(),
-                      server = TRUE
+                      choices = cv()
                       )
     })
         
@@ -77,8 +76,8 @@
             need(input$dataset != '', message = FALSE)
         )
             summ <- datasetInput()[["data"]] %>%
-                        group_by(!!grp()) %>%
-                        summarize(mean = mean(!!gv()),
+                        dplyr::group_by(!!grp()) %>%
+                        dplyr::summarize(mean = mean(!!gv()),
                                   median = median(!!gv()),
                                   sd = sd(!!gv()),
                                   total = n()
@@ -99,7 +98,7 @@
                         y = !!gv())
                     ) +
              geom_boxplot() +
-             geom_jitter(width = .75, # this is messed up -
+             geom_jitter(width = .10, 
                         color = "#0072B2") +                                  # accessible blue
              theme_bw() +
              ggtitle(paste(input$gene,"RNA Expression by",input$grouping)) +   # label plot to what clinical variable is shown 
@@ -108,15 +107,16 @@
              stat_summary(fun.y=mean,                                          # add in a blue dashed line at the mean
                           geom = "errorbar",
                           aes(ymax = ..y.., ymin = ..y..),
+                          width = 1.5,
                           linetype = "dashed",
                           color = "#E69F00")
             )
           })
 
     variance <- reactive({
-                          aov(data = datasetInput()[["data"]],            # aov, call the dataset
-                                 formula = as.formula(paste0(input$gene,  # formula to take gene input
-                                                             "~",         # interpret grade as variable
+                          aov(data = datasetInput()[["data"]],               # aov, call the dataset
+                                 formula = as.formula(paste0(input$gene,     # formula to take gene input
+                                                             "~",            # interpret grade as variable
                                                              input$grouping
                                  )))
                     })
@@ -129,7 +129,7 @@
         )
                                     anova <- summary(variance())
                                     anova_pvalue <- data.frame(anova[[1]]$'Pr(>F)'[1])
-                                    names(anova_pvalue) <- c("p adj")
+                                    names(anova_pvalue) <- c("p-value")
                                     row.names(anova_pvalue) <- "overall"
                                     anova_pvalue
                                  },
@@ -211,6 +211,7 @@
         eval(as.symbol(input$dataset_correlation))
     })
     
+    ## make the correlation plots
     output$correlation_plot <- renderPlotly({
         validate(
             need(input$gene != '', 'Please choose a gene.'),
@@ -224,13 +225,32 @@
                                                         )
                                                      )+
                                               geom_point(color = "#0072B2") + 
-                                              geom_smooth(method= loess, se=FALSE, color = "#56B4E9") +    #add a smoother
-                                              geom_smooth(method = lm, se = FALSE, color = "#E69F00") +    #add a straight line
+                                              geom_smooth(method= loess, se=FALSE, color = "#56B4E9") +          #add a smoother
+                                              geom_smooth(method = lm, se = FALSE, color = "#E69F00") +          #add a straight line
                                               theme_bw() +
                                               ggtitle(paste("RNA Expression of",input$gene,"vs.",input$gene2)) + #title pairwise
                                               xlab(paste(input$gene,"Expression (log2)")) +                      #x axis gene
                                               ylab(paste(input$gene2,"Expression (log2)"))                       #y axis gene
                                              )
         })
+    
 
-
+    ## add correlation coef and association test
+    output$correlation_table <- renderTable({
+        validate(
+            need(input$gene != '', message = F),
+            need(input$gene2 != '', message = F),
+            need(input$dataset_correlation != '', message = F)
+        )     
+        cor_test <- cor.test(formula = as.formula(paste0("~",
+                                                          input$gene,                   # formula to take gene input
+                                                          "+",
+                                                          input$gene2)
+                                                   ),
+                              data = dataset_correlationInput()[["data"]], 
+                              method = "spearman")    
+        
+        cor_table <- as.data.frame(cbind(cor_test$estimate[[1]], cor_test$p.value))
+        names(cor_table) <- c("rho", "p-value")
+        cor_table
+    })
