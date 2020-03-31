@@ -72,7 +72,8 @@ tabPanel(title = "Single Gene Analysis",
             ## tabs to display
             tabsetPanel(type = "tabs",
                         
-                        tabPanel(title = "ANOVA",             ## create tab for Anova visuals
+                        ## ANOVA
+                        tabPanel(title = "Univariable Analyis",             ## create tab for Anova visuals
                                  value = 1,
                                  plotlyOutput("graph"), 
                                  
@@ -91,19 +92,21 @@ tabPanel(title = "Single Gene Analysis",
                                      
                                      ## create space for anova results
                                      column(4,
-                                            "ANOVA",
+                                            "Analysis of Variance",
                                             tableOutput("anova")
                                             
                                      ),
                                      
                                      # create space for tukey results
                                      column(4,
-                                            "Tukey HSD",
+                                            "Tukey HSD (Pairwise)",
                                             tableOutput("tukey")
                                             
                                      )
                                  )
                             ),
+                        
+                        ## Pairwise Correlation tab
                         tabPanel(title = "Pairwise Gene Expression Correlation", 
                                  value = 2,
                                  plotlyOutput("correlation_plot"),

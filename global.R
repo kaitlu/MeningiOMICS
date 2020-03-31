@@ -22,7 +22,7 @@ datasets_load <- c( "datasets/GSE85135_Clark_V_KO.Rda", # find all files in this
                     "datasets/GSE12530_Keller_A_KO.Rda",
                     "datasets/GSE9438_Claus_E_KO.Rda",
                     "datasets/GSE4780_Scheck_A_KO.Rda"
-                   ) # load only some versus the others - add toggle (look into)
+                   )
 
 #### load datasets
 lapply(datasets_load, 
@@ -57,11 +57,9 @@ datasets <- c("Clark_V_2016",
 #### genes by which to analyze
 gene <- character()                      # create an empty character vector
 for (p in datasets) {                    # loop to look through datasets for all available genes
-    gene <- sort(unique(                 # assign unique gene    names to the character vector
-        c(gene,                       
-          colnames(eval(as.symbol(p))[["expression_data"]]) # look through the expression sets for the available genes in each
-        )
-    )
-    )
-}
+    gene <- c(gene,                       
+              colnames(eval(as.symbol(p))[["expression_data"]]) # look through the expression sets for the available genes in each
+              )
+    }
+gene <- sort(unique(gene))
 

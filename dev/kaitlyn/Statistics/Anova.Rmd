@@ -22,7 +22,7 @@ load("~/Documents/Thesis/mgm_eda/datasets/GSE74385_Schmidt_M_KO.Rda")
 # load("~/Documents/Thesis/mgm_eda/datasets/GSE54934_Torres-Martin_M_KO.Rda")
 # load("~/Documents/Thesis/mgm_eda/datasets/GSE55609_Yeh_T_KO.Rda")
 # load("~/Documents/Thesis/mgm_eda/datasets/GSE16156_DUrso_O_KO.Rda")
-# load("~/Documents/Thesis/mgm_eda/datasets/GSE16581_Lee_Y_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE16581_Lee_Y_KO.Rda")
 # load("~/Documents/Thesis/mgm_eda/datasets/GSE12530_Keller_A_KO.Rda")
 # load("~/Documents/Thesis/mgm_eda/datasets/GSE9438_Claus_E_KO.Rda")
 # load("~/Documents/Thesis/mgm_eda/datasets/GSE4780_Scheck_A_KO.Rda")
@@ -83,7 +83,21 @@ plot(fit, which = 1)      # check for equal variance
 leveneTest(data = schm,   # check for homogeneity of variance
            PTTG1 ~ grade
            )
+
+leveneTest(aov(data = schm, ## leveneTest (Brown-Forsythe - centered at median) takes an aov object - already in the app! woot    
+          PTTG1 ~ grade))
 ```
+```{r}
+x <- leveneTest(aov(data = schm,    
+          PTTG1 ~ grade)
+)
+names(x)
+
+y <- x$`Pr(>F)`[[1]]
+y
+```
+
+
 
 ```{r}
 anova(fit) # base r
@@ -171,5 +185,78 @@ genes <- sapply(X = split_R_HSA_210746,
 )
 
 sapply(genes, var_grade, dataset= schm)
+```
+
+### welch one-way test
+```{r}
+oneway.test(data = schm,     
+          PTTG1 ~ grade)
+
+v <- aov(data = schm,PTTG1 ~ grade)
+
+#names(v)
+w <- v$call
+#w
+#str(w)
+
+r <- as.character(v$call)
+#r
+#str(r)
+e <- r[[2]]
+f <- r[[3]]
+
+t <- oneway.test(formula = as.formula(e), data = eval(as.symbol(f)))
+names(t)
+
+str(t$p.value)
+
+```
+
+
+
+```{r}
+is.numeric(schm %>% select(grade))
+
+is.double(schm %>% select(grade))
+
+```
+```{r}
+lee <- Lee_Y[["data"]]
+
+## Summary statistics across grade
+summ2 <- lee %>% 
+               summarize(
+                   mean = mean(PTTG1), 
+                   median = median(PTTG1), 
+                   sd = sd(PTTG1),
+                   total = n()
+               )
+summ2
+
+```
+
+```{r}
+fit_cont <- summary(lm(data = lee,  # linear model  
+                       PTTG1 ~ age) # expression over age
+) 
+
+lm <- data.frame(fit_cont$coefficients)[2,c(1,4)]
+colnames(lm) <- c("V1","V2")
+```
+
+## create spearman correlation
+```{r}
+t <- cor.test(lee$PTTG1, lee$age, method = "spearman")
+
+rho <- as.data.frame(cbind(t$estimate[[1]], t$p.value))
+
+cont <- rbind(lm,rho)
+names(cont) <- c("Estimate", "p-value")
+row.names(cont) <- c("Univariable Linear Slope", "Correlation Coefficient")
+cont
+```
+```{r}
+str(cont)
+is.numeric(lee$age)
 ```
 

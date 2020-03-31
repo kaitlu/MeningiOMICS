@@ -14,50 +14,12 @@ tabPanel(title = "Multigene Analysis",
                                             label = "Genes",
                                             value = NULL,
                                             placeholder = 'Please paste a comma seperated list of genes of interest'
-                                  ),
-                                  
-                                 
-                                  
-                                  ## select clinical variable to group by
-                                  selectizeInput(inputId = "multi_grouping",
-                                                 label = "Select variable to analyze",
-                                                 choices = NULL,
-                                                 selected = NULL,
-                                                 options = list(
-                                                     placeholder = 'Please select an option below',
-                                                     onInitialize = I('function() { this.setValue(""); }')
-                                                 )
-                                  ),
-                                  
-                                  ## select dataset to analyze
-                                  selectizeInput("multi_dataset",
-                                                 label = "Select a dataset", 
-                                                 choices = NULL,
-                                                 selected = NULL,
-                                                 options = list(
-                                                     placeholder = 'Please select an option below',
-                                                     onInitialize = I('function() { this.setValue(""); }')
-                                                 )
                                   )
-                                 
-                 ), # goes with conditional panel
+                                  
+                                  
+                 ), 
                  
-                 # (inputId = "gene_user_input",
-                 #                label = "Gene",
-                 #                choices = gene, #needs to be updated with a reactive
-                 #                selected = NULL,
-                 #                multiple = TRUE,
-                 #                options = list(
-                 #                    placeholder = 'Please paste a comma seperated list of genes of interest',
-                 #                    delimiter = ',',
-                 #                    onInitialize = I('function(input, callback) {
-                 #                                        return {value: input,
-                 #                                                text: input
-                 #                                                };}')
-                 #                )
-                 # ),
-                 
-                 conditionalPanel(condition="input.panelselected==2",   # sidebar panel for when anova tab is selected
+                 conditionalPanel(condition="input.panelselected==2",   # sidebar panel for when heatmap tab is selected
                                   
                                   ## feild for users to paste in selections 
                                   textInput(inputId = "significant_gene_user_input",
@@ -65,30 +27,45 @@ tabPanel(title = "Multigene Analysis",
                                             value = NULL,
                                             placeholder = 'Please paste a comma seperated list of genes of interest'
                                   ),
+                 ),
                                   
+             
+                 ## select clinical variable to group by
+                 selectizeInput(inputId = "multi_grouping",
+                                label = "Select variable to analyze",
+                                choices = NULL,
+                                selected = NULL,
+                                options = list(
+                                    placeholder = 'Please select an option below',
+                                    onInitialize = I('function() { this.setValue(""); }')
+                                )
+                 ),
+                 
+                 ## select dataset to analyze
+                 selectizeInput("multi_dataset",
+                                label = "Select a dataset", 
+                                choices = NULL,
+                                selected = NULL,
+                                options = list(
+                                    placeholder = 'Please select an option below',
+                                    onInitialize = I('function() { this.setValue(""); }')
+                                )
+                 ),
+                 
+                 conditionalPanel(condition="input.panelselected==1",   # conditional panel for when anova tab is selected
                                   
-                                  ## select clinical variable to group by
-                                  selectizeInput(inputId = "significant_multi_grouping",
-                                                 label = "Select variable to analyze",
-                                                 choices = NULL,
-                                                 selected = NULL,
-                                                 options = list(
-                                                     placeholder = 'Please select an option below',
-                                                     onInitialize = I('function() { this.setValue(""); }')
+                                  ## select significance level of interest 
+                                  selectizeInput("sig_level",
+                                                 label = "Choose an alpha value (level of significance)", 
+                                                 choices = c(.01, 
+                                                             .05, 
+                                                             .1
+                                                             ),
+                                                 selected = .05
                                                  )
-                                  ),
                                   
-                                  ## select dataset to analyze
-                                  selectizeInput("significant_multi_dataset",
-                                                 label = "Select a dataset", 
-                                                 choices = NULL,
-                                                 selected = NULL,
-                                                 options = list(
-                                                     placeholder = 'Please select an option below',
-                                                     onInitialize = I('function() { this.setValue(""); }')
-                                                 )
-                                  )
                  )
+                 
                  
              ),
                  

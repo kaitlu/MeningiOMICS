@@ -10,7 +10,7 @@ shinyUI(
                source("tabs/landing_ui.R", local = TRUE)$value,     
                source("tabs/singlegene_ui.R", local = TRUE)$value,
                source("tabs/multigene_ui.R", local = TRUE)$value,
-               source("tabs/upload_ui.R", local = TRUE)$value,
+               # source("tabs/upload_ui.R", local = TRUE)$value,  # to be built
                source("tabs/about_ui.R", local = TRUE)$value
                )
 )

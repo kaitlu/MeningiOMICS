@@ -69,16 +69,13 @@
       
       ## function for anova over multiple genes
       multi_anova <- function(gene, clinical_variable, dataset) {
-         aov <- summary(aov(data = dataset,                               # aov, call the dataset
-                            formula = as.formula(paste0("`",(gene),"`",   # need the quoted backhashes around gene to read "irregular" column/gene names
+         aov <- summary(aov(data = dataset,                                 # aov, call the dataset
+                            formula = as.formula(paste0("`",(gene),"`",     # need the quoted backhashes around gene to read "irregular" column/gene names
                                                         "~",
-                                                        clinical_variable # over clinical variables
-                            )
-                            )  
-         )
-         )
-         anova_pvalue <- data.frame(gene_name = as.character(gene),       # gene name
-                                    `p adj` = aov[[1]]$'Pr(>F)'[1]        # extracted p-value
+                                                        clinical_variable)) # over clinical variables
+                        ))
+         anova_pvalue <- data.frame(gene_name = as.character(gene),         # gene name
+                                    `p adj` = aov[[1]]$'Pr(>F)'[1]          # extracted p-value
          ) 
          anova_pvalue
       }
@@ -98,6 +95,9 @@
       
       ## create reactive variable for dataset
       dui <- reactive({eval(as.symbol(input$multi_dataset))})
+      
+      ## create reactive variable for dataset
+      sig <- reactive({input$sig_level})
       
       ## output results from user input gene list to an object
       multianova_out <-reactive(invisible(                          # prevent lapply from printing
@@ -135,7 +135,7 @@
       
       
       # copy and pastable text of genes significant at the selected alpha level
-      filtered_results <- reactive(multianova_table()  %>% filter(p.adj<.05)) # edit this to have selectable alpha
+      filtered_results <- reactive(multianova_table()  %>% filter(p.adj<sig())) # edit this to have selectable alpha
       significant_genes <- reactive(as.character(filtered_results()$gene_name))
       
       output$signficant_list_title <- renderText({
@@ -158,91 +158,14 @@
       
       
       #### heatmap
-  
-      ## find the available datasets for all selected signifiacnt genes 
-      s_datasets_with_all_genes <- reactive({
-         s_available_datasets_multi <- character()
-         for (i in datasets) {
-            if(all(c(strsplit(input$significant_gene_user_input, split =",")[[1]]) %in% colnames(eval(as.symbol(i))[["data"]])
-            )
-            ) {
-               s_available_datasets_multi <- c(s_available_datasets_multi,
-                                                i
-               )
-               
-               
-            }
-         }
-         return(s_available_datasets_multi)
-      })
-      
-      
-      # find available clinical variables in available datasets
-      s_multi_cv <- reactive({
-         s_clinical_variables <- character()
-         for (i in  s_datasets_with_all_genes()) {
-            s_clinical_variables <- sort(unique(
-               c(s_clinical_variables,
-                 colnames(eval(
-                    as.symbol(i))[["clinical_data"]]
-                 )
-               )
-            )
-            )
-            
-         }
-         return(s_clinical_variables)
-      }) 
-      
-      ## populate the available clinical variables for selected gene in UI
-      observe({
-         updateSelectizeInput(session = session,
-                              inputId = "significant_multi_grouping",
-                              label = NULL,
-                              choices = s_multi_cv()
-         )
-      })
-      
-      ## find the available datasets for selected gene and clinical data in ANOVA UI
-      s_multi_ad <- reactive({
-         s_genes_clinical_datasets <- character()
-         for (i in s_datasets_with_all_genes()) {
-            if(all(c(c(strsplit(input$significant_gene_user_input,split =",")[[1]]),input$significant_multi_grouping) %in% colnames(eval(as.symbol(i))[["data"]]
-            ))
-            ) {
-               s_genes_clinical_datasets <- c(s_genes_clinical_datasets,
-                                            i)
-               
-            }
-         }
-         return(s_genes_clinical_datasets)
-      })
-      
-      ## populate the available datasets for selected gene and clinical data
-      observe({
-         updateSelectizeInput(session,
-                              inputId = "significant_multi_dataset",
-                              label = NULL,
-                              choices = s_multi_ad()
-         )
-      })
-      
-      ## create reactive variable for clinical variable
-      s_cvui <- reactive({as.symbol(input$significant_multi_grouping)})
-      
-      
-      ## create reactive variable for dataset
-      s_dui <- reactive({eval(as.symbol(input$significant_multi_dataset))})
-      
-      
       output$heatmap <- renderPlotly({
          validate(
             need(input$significant_gene_user_input != '', message = FALSE),
-            need(input$significant_multi_grouping != '', message = FALSE),
-            need(input$significant_multi_dataset != '', message = FALSE)
+            need(input$multi_grouping != '', message = FALSE),
+            need(input$multi_dataset != '', message = FALSE)
          )
-          heatmaply(x = s_dui()[["data"]] %>% select(as.character(strsplit(input$significant_gene_user_input, split =",")[[1]])),
-                    RowSideColors = s_dui()[["data"]] %>% select(input$significant_multi_grouping),
+          heatmaply(x = dui()[["data"]] %>% select(as.character(strsplit(input$significant_gene_user_input, split =",")[[1]])),
+                    RowSideColors = dui()[["data"]] %>% select(input$multi_grouping),
                     xlab = "Gene",
                     main = "Gene Expression Heatmap",
                     key.title = "Expression",
