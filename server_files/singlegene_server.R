@@ -84,7 +84,7 @@
                mode = "markers"
                ) %>% 
            layout(margin = list(t = 85),
-                  title = list(text = paste(input$gene,"RNA Expression by",input$grouping)),
+                  title = list(text = paste(input$gene,"RNA Expression by",input$grouping,"in",input$dataset)),
                   xaxis = list(title = input$grouping), 
                   yaxis = list(title = paste(input$gene,"Expression (log2)"))
            )
@@ -103,7 +103,7 @@
                 line = list(color = "#0072B2")
         ) %>% 
             layout(margin = list(t = 85),
-                   title = list(text = paste(input$gene,"RNA Expression by",input$grouping)),
+                   title = list(text = paste(input$gene,"RNA Expression by",input$grouping,"in",input$dataset)),
                    xaxis = list(title = input$grouping), 
                    yaxis = list(title = paste(input$gene,"Expression (log2)"))
                    )
@@ -130,6 +130,22 @@
        #     )
           })
 
+    ## summary title 
+    output$summary_title <- renderText({
+      validate(
+        need(input$gene != '', message = FALSE),
+        need(input$grouping != '', message = FALSE),
+        need(input$dataset != '', message = FALSE)
+      )
+      
+      if (is.double(datasetInput()[["data"]] %>% pull(grp())) == TRUE) {
+        #### continuous variables
+        print(paste0("Summary of ",input$gene," and ",input$grouping))
+      } else {
+        #### categorical variables
+        print(paste0("Summary of ",input$gene," Expression by ",input$grouping))
+      }
+    })
     
     ## provide summary statistics over expression
     output$summary <- renderTable({
@@ -186,7 +202,24 @@
                                  )))
                     })
     
-    ## homogeneity of variance results
+    ## center panel (linear fit or aov) title
+    output$center_title <- renderText({
+      validate(
+        need(input$gene != '', message = FALSE),
+        need(input$grouping != '', message = FALSE),
+        need(input$dataset != '', message = FALSE)
+      )
+      
+      if (is.double(datasetInput()[["data"]] %>% pull(grp())) == TRUE) {
+        #### continuous variables
+        print("Linear Fit and Strength of Association")
+      } else {
+        #### categorical variables
+        print("Analysis of Variance")
+      }
+    })
+    
+    ## center panel (linear fit or aov) results
     output$anova <- renderTable({
         validate(
             need(input$gene != '', message = FALSE),
@@ -260,6 +293,25 @@
          },           # end table function
     digits = 2,       # sign digits
     rownames = TRUE)  # include row names
+    
+    
+    ## tukey title (blank for cont)
+    output$tukey_title <- renderText({
+      validate(
+        need(input$gene != '', message = FALSE),
+        need(input$grouping != '', message = FALSE),
+        need(input$dataset != '', message = FALSE)
+      )
+      
+      if (is.double(datasetInput()[["data"]] %>% pull(grp())) == TRUE) {
+        #### continuous variables
+        ## do nothing
+      } else {
+        #### categorical variables
+        print("Tukey HSD (Pairwise)")
+      }
+    })
+    
     
     ## tukey (pairwise) results
     output$tukey <- renderTable({
@@ -377,7 +429,7 @@
             ) %>% 
         
             layout(margin = list(t = 85),
-                   title =  list(text = paste("RNA Expression of",input$gene,"vs.",input$gene2)),
+                   title =  list(text = paste("RNA Expression of",input$gene,"vs.",input$gene2,"in",input$dataset)),
                    xaxis =  list(title = paste(input$gene,"Expression (log2)")), 
                    yaxis =  list(title = paste(input$gene2,"Expression (log2)")),
                    legend = list(orientation = "h")

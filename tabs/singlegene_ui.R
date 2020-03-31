@@ -85,21 +85,21 @@ tabPanel(title = "Single Gene Analysis",
                                      
                                      ## create space for summary table
                                      column(4,
-                                            "Summary of Expression",
+                                            h5(textOutput("summary_title")),
                                             tableOutput("summary")
                                             
                                      ),
                                      
                                      ## create space for anova results
                                      column(4,
-                                            "Analysis of Variance",
+                                            h5(textOutput("center_title")),
                                             tableOutput("anova")
                                             
                                      ),
                                      
                                      # create space for tukey results
                                      column(4,
-                                            "Tukey HSD (Pairwise)",
+                                            h5(textOutput("tukey_title")),
                                             tableOutput("tukey")
                                             
                                      )
