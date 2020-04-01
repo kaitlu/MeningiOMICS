@@ -35,6 +35,7 @@
       
       ## populate the available clinical variables for selected gene in UI
       observe({
+         req(input$gene_user_input)
          updateSelectizeInput(session = session,
                               inputId = "multi_grouping",
                               label = NULL,
@@ -59,6 +60,8 @@
       
       ## populate the available datasets for selected gene and clinical data
       observe({
+         req(input$gene_user_input)
+         req(input$multi_grouping)
          updateSelectizeInput(session,
                               inputId = "multi_dataset",
                               label = NULL,
@@ -78,17 +81,18 @@
                                     `p adj` = aov[[1]]$'Pr(>F)'[1]          # extracted p-value
          ) 
          anova_pvalue
+         print("multi anova")
       }
       
       ## create reactive variable for user input list of genes
      
-       gui <- reactive(lapply(                # input comes as a string
+       gui <- reactive({lapply(                # input comes as a string
          as.list(                            # need to feed multi_anova a list
             strsplit(input$gene_user_input,  # parse user input
                      split =","              # by comma
             )[[1]]),                         # index into list         
          as.symbol)                          # need the gene name unquoted
-      )
+          })
       
       ## create reactive variable for clinical variable
       cvui <- reactive({as.symbol(input$multi_grouping)})
@@ -100,7 +104,7 @@
       sig <- reactive({input$sig_level})
       
       ## output results from user input gene list to an object
-      multianova_out <-reactive(invisible(                          # prevent lapply from printing
+      multianova_out <-reactive({invisible(                          # prevent lapply from printing
                                 lapply(                             # use user list and apply function
                                    gui(),                           # created reactive variable list 
                                    FUN = multi_anova,                          # function is the multi_anova
@@ -108,7 +112,7 @@
                                    dataset = dui()[["data"]]        # in selected dataset
                                 )
                                 )
-      )
+      })
       
       
       ## bind results into a table to use in the datatable - reactive to user input
@@ -119,7 +123,11 @@
       )
       
       # title for multigene anova
-      output$multianova_results_title <- renderText({
+      output$multianova_results_title <- renderText({validate(
+         need(input$gene_user_input != '', message = "Please enter comma seperated genes of interest"),
+         need(input$multi_grouping != '', message = FALSE),
+         need(input$multi_dataset != '', message = FALSE)
+      )
          paste0("Results of ANOVA")
       })
       

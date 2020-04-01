@@ -4,7 +4,7 @@ author: "Kaitlyn O'Shea"
 date: "9/30/2019"
 output: html_document
 ---
-
+## three samples are labeled "arachnoid"rather than grade data
 
 ```{r setup}
 knitr::opts_chunk$set(echo = TRUE,

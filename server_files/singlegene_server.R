@@ -17,7 +17,8 @@
     
     ## populate the available clinical variables for selected gene in UI
     observe({
-        updateSelectizeInput(session = session,
+      req(input$gene)  
+      updateSelectizeInput(session = session,
                       inputId = "grouping",
                       label = NULL,
                       choices = cv()
@@ -44,7 +45,9 @@
     
     ## populate the available datasets for selected gene and clinical data
     observe({
-        updateSelectizeInput(session,
+      req(input$gene)
+      req(input$grouping)
+      updateSelectizeInput(session,
                           inputId = "dataset",
                           label = NULL,
                           choices = ad()
@@ -59,11 +62,11 @@
     ## reactive to pull out dataset
     datasetInput <- reactive({
         eval(as.symbol(input$dataset))
-    })
+      })
 
     ## reactive to pull out grouping
     grp <- reactive({as.symbol(input$grouping)
-    })
+      })
 
 
     ## Visualize expression values across selected clinical variables
@@ -73,7 +76,7 @@
             need(input$grouping != '', 'Please choose a clinical variable.'),
             need(input$dataset != '', "Please choose a dataset")
         )
-        
+
        if (is.double(datasetInput()[["data"]] %>% pull(grp())) == TRUE) {
         
        ## continuous data
@@ -144,7 +147,6 @@
             need(input$grouping != '', message = FALSE),
             need(input$dataset != '', message = FALSE)
         )
-        
         if (is.double(datasetInput()[["data"]] %>% pull(grp())) == TRUE) {
             
         #### continuous variables
@@ -185,7 +187,10 @@
     
     ## reactive aov object for use in cateegorical calculations
     variance <- reactive({
-                          aov(data = datasetInput()[["data"]],                   # aov, call the dataset
+                          req(input$gene)
+                          req(input$grouping)
+                          req(input$dataset)
+                            aov(data = datasetInput()[["data"]],                   # aov, call the dataset
                                  formula = as.formula(paste0("`",input$gene,"`", # formula to take gene input
                                                              "~",                
                                                              input$grouping
@@ -352,6 +357,7 @@
     
     ## populate the available second genes for initially selected gene in UI
     observe({
+      req(input$gene)
         updateSelectizeInput(session,
                              inputId = "gene2",
                              label = NULL,
@@ -380,6 +386,8 @@
     
     ## populate the available datasets for selected gene pair
     observe({
+      req(input$gene)
+      req(input$gene2)
         updateSelectizeInput(session,
                              inputId = "dataset_correlation",
                              label = NULL,

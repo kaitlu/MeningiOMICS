@@ -5,6 +5,7 @@ date: "9/30/2019"
 output: html_document
 ---
 
+## some samples have no recurrence nor grade data
 
 ```{r setup}
 knitr::opts_chunk$set(echo = TRUE,

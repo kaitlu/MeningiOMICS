@@ -1,0 +1,54 @@
+---
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+## Objective
+      
+The Meningioma Visualization Tool leverages publicly available data in an interactive web application to provide:
+
+* A hub for collective analysis of meningioma data
+* Statistically robust and easily interpretable graphs and analysis
+* A platform for integration of datasets not yet publicly available
+
+*****       
+  
+## Get Started
+        
+Explore select publicly available meningioma datasets! Select a tab above to begin. Guide messages appear on screen to guide use, but more information may be found in the 'About' tab.
+        
+*****
+
+## Functionality Overview
+        
+### Single Gene Analysis Tab
+        
+  * Analytical Functionality
+      + Summary Statistics
+      + ANOVA of expression by clinical variable
+      + Tukey’s Honest Significant Difference (test of pairwise differences)
+      + Correlation test of association
+              
+         
+  * Visualization Functionality
+      + Visualization of expression by clinical variable boxplot/scatterplot
+      + Pairwise gene correlation plots
+
+### Multigene Analysis Tab
+        
+  * Analytical Functionality
+      + Multigene ANOVA of expression by clinical variable
+      + Visualization Functionality"),
+      + Heatmap and hierarchical clustering of expression")
+        
+        
+*****
+        
+## Questions?
+        
+Contact the authors of the application via email.
+
+*****
