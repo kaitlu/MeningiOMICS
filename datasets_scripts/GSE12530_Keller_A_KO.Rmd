@@ -95,7 +95,7 @@ rowsd <- function(x) {
 ## keep only the probe with greatest variability across tumors as rna variable 
 gse12530_rna <-
                bind_cols(gse12530_feature["Gene symbol"], gse12530_exprs) %>% # add gene name to expression data
-               rename("gene" = "Gene symbol") %>%                             # rename name variable as 'gene' 
+              rename("gene" = "Gene symbol") %>%                             # rename name variable as 'gene' 
                filter(gene != "") %>%                                         # keep only data for named genes
                mutate(sd = rowsd(.[,-1])) %>%                                 # calculate sd for each probe, index out gene name
                group_by(gene) %>%                                             # group probes by gene
@@ -104,14 +104,16 @@ gse12530_rna <-
                select(-sd) %>%                                                # select all but sd column
                pivot_longer(-gene,                                            # do not group by gene 
                             names_to = "geo_accession",                       # 'key' via gather
-                            values_to = "value") %>%                          
-                mutate("standardized" = (value - mean(value))/                # center at mean for gene 
+                            values_to = "value") %>%   
+                group_by(gene) %>%                                            # standardize for cross data set comparison
+                mutate("standardized" = (value - mean(value)) /                               # center at mean for gene 
                                          sd(value),                           # scale by sd for gene
                        ) %>%
                 ungroup() %>%                                                  # ungroup by genes 
-                select(-value) %>%                                             # select all but sd column
+                select(-value) %>%                                  # select all but sd column
                 pivot_wider(names_from = "gene",                               # final format genes as rows
-                            values_from = "standardized")                      # final format expression across accession as columns    
+                            values_from = "standardized")                      # final format expression across accession as column
+                  
 ```
 
 ## Dataset for Analysis

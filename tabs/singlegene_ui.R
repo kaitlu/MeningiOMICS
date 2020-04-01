@@ -4,11 +4,11 @@ tabPanel(title = "Single Gene Analysis",
         
         sidebarPanel(
             
-            helpText("Analyis and visualization of RNA expression"),
+            helpText("Analysis and visualization of RNA expression"),
             
             ## select gene to group by
             selectizeInput(inputId = "gene",
-                           label = "Gene",
+                           label = "Select a Gene",
                            choices = gene,
                            options = list(
                                placeholder = 'Please select an option below',
@@ -72,8 +72,8 @@ tabPanel(title = "Single Gene Analysis",
             ## tabs to display
             tabsetPanel(type = "tabs",
                         
-                        ## ANOVA
-                        tabPanel(title = "Univariable Analyis",             ## create tab for Anova visuals
+                        ## Single Gene - Phenotype Tab
+                        tabPanel(title = "Gene-Phenotype Analysis",           
                                  value = 1,
                                  plotlyOutput("graph"), 
                                  
@@ -84,7 +84,7 @@ tabPanel(title = "Single Gene Analysis",
                                  fluidRow(
                                      
                                      ## create space for summary table
-                                     column(4,
+                                     column(5,
                                             h5(textOutput("summary_title")),
                                             tableOutput("summary")
                                             
@@ -98,12 +98,19 @@ tabPanel(title = "Single Gene Analysis",
                                      ),
                                      
                                      # create space for tukey results
-                                     column(4,
+                                     column(3,
                                             h5(textOutput("tukey_title")),
                                             tableOutput("tukey")
                                             
                                      )
-                                 )
+                                 ),
+                                 
+                                 ## horizontal line
+                                 hr(),
+                                 
+                                 ## footnote for ANOVA v Welch per homogeneity of variance
+                                 fluidRow(h6(textOutput("anova_footnote")))
+                                 
                             ),
                         
                         ## Pairwise Correlation tab
@@ -116,7 +123,7 @@ tabPanel(title = "Single Gene Analysis",
                                  
                                  fluidRow(
                                      column(4,
-                                         "Spearman's Rank Correlation Coefficient",
+                                         "Spearman's Correlation Coefficient",
                                          tableOutput("correlation_table")
                                      )
                                  )

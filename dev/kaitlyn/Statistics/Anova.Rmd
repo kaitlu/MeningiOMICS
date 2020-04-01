@@ -133,7 +133,8 @@ c <- TukeyHSD(aov(data = schm,
 str(c)
 
 d <- as.data.frame(c$grade)
-d
+d[,c(1,4)]
+
 library(plyr)
 e <- rbind.fill(d, b)
 e
@@ -258,5 +259,9 @@ cont
 ```{r}
 str(cont)
 is.numeric(lee$age)
+```
+```{r}
+lee$PTTG1
+lee$age
 ```
 

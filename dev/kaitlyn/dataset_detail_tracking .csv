@@ -8,7 +8,7 @@ yes,yes,yes,arachnoid in grading – is this a grade? Right now it’s an NA,Yeh
 ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 yes,yes,yes,no vital status – type issues,Durso_O,GSE16181,,5.11.11,GPL8557,RNA,log2 ,189,0,189,0,1,1,1,1,0,1,1,1,0,1,0,0,1,0,0,0,0,Homo sapiens,
 yes,yes,yes,,Lee_Y,GSE16584,GSE16581,12.1.10,GPL570,RNA,,68,0,68,0,1,1,1,1,0,0,0,1,1,0,1,1,0,1,0,0,0,Homo sapiens,
-yes,yes,yes,max sd,Keller_A,GSE12530,,11.21.08,GPL2895,RNA,Normalized signal intensity,26,26,2,24,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,Homo sapiens
+yes,yes,yes,max sd,Keller_A,GSE12530,,11.21.08,GPL2895,log2RNA,Normalized signal intensity,26,26,2,24,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,Homo sapiens
 yes,,,,Claus_E,GSE9438,,12.1.07,GPL570,,"The mRNA was reverse transcribed to generate cDNA, which was then biotinylated and hybridized to Affymetrix U133 plus 2.0 expression arrays",31,,,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,Homo sapiens,
 yes,,,grade only,Scheck_A,GSE4780,,6.6.06,GPL570,RNA,,57,,,,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,Homo sapiens,
 ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

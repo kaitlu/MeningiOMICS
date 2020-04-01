@@ -81,8 +81,18 @@
                x = ~eval(grp()),
                y = ~eval(gv()),
                type = "scatter",
-               mode = "markers"
+               mode = "markers",
+               name = "Samples"
                ) %>% 
+          add_lines(y = ~fitted(loess(eval(gv()) ~ eval(grp()), na.action = na.exclude)),
+                   line = list(color = "#56B4E9"),
+                   name = "Local Smoother"
+           ) %>%
+         
+          add_lines(y = ~fitted(lm(eval(gv()) ~ eval(grp()), na.action = na.exclude)),
+                   line = list(color = "#E69F00"),
+                   name = "Simple Linear Regression"
+           ) %>% 
            layout(margin = list(t = 85),
                   title = list(text = paste(input$gene,"RNA Expression by",input$grouping,"in",input$dataset)),
                   xaxis = list(title = input$grouping), 
@@ -108,26 +118,6 @@
                    yaxis = list(title = paste(input$gene,"Expression (log2)"))
                    )
        }
-        ## using ggplot with plotly wrapper
-       #  ggplotly(
-       #      ggplot(data = datasetInput()[["data"]],
-       #             aes(x = !!grp(),
-       #                 y = !!gv())
-       #             ) +
-       #      geom_boxplot() +
-       #      geom_jitter(width = .10, 
-       #                 color = "#0072B2") +                                  # accessible blue
-       #      theme_bw() +
-       #      ggtitle(paste(input$gene,"RNA Expression by",input$grouping)) +   # label plot to what clinical variable is shown 
-       #      xlab(input$grouping) +                                            # x axis grouping variable
-       #      ylab(paste(input$gene,"Expression (log2)")) +                     # y axis gene 
-       #      stat_summary(fun.y=mean,                                          # add in a blue dashed line at the mean
-       #                   geom = "errorbar",
-       #                   aes(ymax = ..y.., ymin = ..y..),
-       #                   width = 1.5,
-       #                   linetype = "dashed",
-       #                   color = "#E69F00")
-       #     )
           })
 
     ## summary title 
@@ -173,8 +163,8 @@
             )
         
         summ_cont <- data.frame(rbind(summ_exp, summ_var))
-        row.names(summ_cont) <- c(input$gene, input$grouping)
-        summ_cont
+        variable <- c(input$gene, input$grouping)
+        cbind(variable,summ_cont)
         
         } else {    
                 
@@ -191,7 +181,7 @@
         
      },                # end table function
      digits = 2,       # sign digits
-     rownames = TRUE)  # include row names
+     rownames = FALSE)  # include row names
     
     ## reactive aov object for use in cateegorical calculations
     variance <- reactive({
@@ -230,17 +220,6 @@
         if (is.double(datasetInput()[["data"]] %>% pull(grp())) == TRUE) {
         
         #### continuous variables
-        
-        ## univariate slope and pvalue
-        fit_cont <- summary(lm(data = datasetInput()[["data"]],                # lm, call the dataset
-                               formula = as.formula(paste0("`",input$gene,"`", # formula to take gene input
-                                                           "~",                
-                                                           input$grouping
-                               )))) 
-            
-        lm_cont <- data.frame(fit_cont$coefficients)[2,c(1,4)] # extract estimate and pvalue
-        colnames(lm_cont) <- c("V1","V2")                      # rename columns to rbind later
-        
         ## spearman correlation coefficient
         cont_rho <- cor.test(formula = as.formula(paste0("~",
                                                          "`",input$gene,"`",     # formula to take gene input
@@ -251,12 +230,10 @@
                             method = "spearman")  
         
         rho_cont <- as.data.frame(cbind(cont_rho$estimate[[1]], cont_rho$p.value))
+        names(rho_cont) <- c("Estimate", "pvalue")
+        row.names(rho_cont) <- c("Spearman's Correlation Coefficient")
         
-        cont <- rbind(lm_cont, rho_cont)
-        names(cont) <- c("Estimate", "pvalue")
-        row.names(cont) <- c("Univariable Linear Slope", "Correlation Coefficient")
-        
-        cont
+        rho_cont
                  
         } else {
         
@@ -283,7 +260,7 @@
         )
         welch_pvalue <- data.frame(welch$p.value)
         names(welch_pvalue) <- c("p-value")
-        row.names(welch_pvalue) <- "Welch's Results"
+        row.names(welch_pvalue) <- "Welch's Results*"
         
         ## create table
         rbind(homogen_pvalue, anova_pvalue, welch_pvalue)
@@ -331,12 +308,29 @@
     #### categorical variables
         
     tukey <- TukeyHSD(variance())
-    as.data.frame(tukey[[input$grouping]])
+    as.data.frame(tukey[[input$grouping]])[, c(1,4)]
     
     }
     
     },
     rownames = TRUE)
+    
+    ## footnote to accompany categorical results
+    output$anova_footnote <- renderText({
+      validate(
+        need(input$gene != '', message = FALSE),
+        need(input$grouping != '', message = FALSE),
+        need(input$dataset != '', message = FALSE)
+      )
+      
+      if (is.double(datasetInput()[["data"]] %>% pull(grp())) == TRUE) {
+        #### continuous variables
+        ## do nothing
+      } else {
+        #### categorical variables
+        print("*When conducting an ANOVA, an assumption of the test is that there is homogeneity of variance in the response variable across groups. Results obtained from an ANOVA are valid when the p-value obtained from the test of homogeneity of variance indicates failure to reject the null (i.e. > .05). Welch's unequal variances t-test, should be used when there is not homogeneity of variance.")
+      }
+    })
 
 ## correlation plots
     
@@ -418,12 +412,12 @@
                 mode = "markers",
                 name = "Samples"
         )  %>%
-            add_lines(y = ~fitted(loess(eval(gv2()) ~ eval(gv()))),
+            add_lines(y = ~fitted(loess(eval(gv2()) ~ eval(gv()), na.action = na.exclude)),
                       line = list(color = "#56B4E9"),
                       name = "Local Smoother"
             ) %>%
             
-            add_lines(y = ~fitted(lm(eval(gv2()) ~ eval(gv()))),
+            add_lines(y = ~fitted(lm(eval(gv2()) ~ eval(gv()), na.action = na.exclude)),
                       line = list(color = "#E69F00"),
                       name = "Simple Linear Regression"
             ) %>% 
@@ -431,25 +425,9 @@
             layout(margin = list(t = 85),
                    title =  list(text = paste("RNA Expression of",input$gene,"vs.",input$gene2,"in",input$dataset)),
                    xaxis =  list(title = paste(input$gene,"Expression (log2)")), 
-                   yaxis =  list(title = paste(input$gene2,"Expression (log2)")),
-                   legend = list(orientation = "h")
+                   yaxis =  list(title = paste(input$gene2,"Expression (log2)"))
             )
         
-        ## with ggplot2
-      #    ggplotly(
-      #                                       ggplot(data = dataset_correlationInput()[["data"]],
-      #                                              aes(x = !!gv(),
-      #                                                  y = !!gv2()
-      #                                                  )
-      #                                               )+
-      #                                        geom_point(color = "#0072B2") + 
-      #                                        geom_smooth(method= loess, se=FALSE, color = "#56B4E9") +          #add a smoother
-      #                                        geom_smooth(method = lm, se = FALSE, color = "#E69F00") +          #add a straight line
-      #                                        theme_bw() +
-      #                                        ggtitle(paste("RNA Expression of",input$gene,"vs.",input$gene2)) + #title pairwise
-      #                                        xlab(paste(input$gene,"Expression (log2)")) +                      #x axis gene
-      #                                        ylab(paste(input$gene2,"Expression (log2)"))                       #y axis gene
-      #                                       )
         })
     
 
