@@ -15,17 +15,17 @@ library(stringr)
 
 ## Load Datasets
 ```{r}
-# load("~/Documents/Thesis/mgm_eda/datasets/GSE85135_Clark_V_KO.Rda")
-# load("~/Documents/Thesis/mgm_eda/datasets/GSE58037_Clark_V_KO.Rda")
-# load("~/Documents/Thesis/mgm_eda/datasets/GSE77259_Schulten_H_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE74385_Schmidt_M_KO.Rda")
-# load("~/Documents/Thesis/mgm_eda/datasets/GSE54934_Torres-Martin_M_KO.Rda")
-# load("~/Documents/Thesis/mgm_eda/datasets/GSE55609_Yeh_T_KO.Rda")
-# load("~/Documents/Thesis/mgm_eda/datasets/GSE16156_DUrso_O_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE16581_Lee_Y_KO.Rda")
-# load("~/Documents/Thesis/mgm_eda/datasets/GSE12530_Keller_A_KO.Rda")
-# load("~/Documents/Thesis/mgm_eda/datasets/GSE9438_Claus_E_KO.Rda")
-# load("~/Documents/Thesis/mgm_eda/datasets/GSE4780_Scheck_A_KO.Rda")
+# load("datasets/GSE85135_Clark_V_KO.Rda")
+# load("datasets/GSE58037_Clark_V_KO.Rda")
+# load("datasets/GSE77259_Schulten_H_KO.Rda")
+load("datasets/GSE74385_Schmidt_M_KO.Rda")
+# load("datasets/GSE54934_Torres-Martin_M_KO.Rda")
+# load("datasets/GSE55609_Yeh_T_KO.Rda")
+# load("datasets/GSE16156_DUrso_O_KO.Rda")
+load("datasets/GSE16581_Lee_Y_KO.Rda")
+# load("datasets/GSE12530_Keller_A_KO.Rda")
+# load("datasets/GSE9438_Claus_E_KO.Rda")
+# load("datasets/GSE4780_Scheck_A_KO.Rda")
 ```
 
 ## Proof of concept using GSE74385_Schmidt_M_KO.Rda

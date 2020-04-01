@@ -81,7 +81,6 @@
                                     `p adj` = aov[[1]]$'Pr(>F)'[1]          # extracted p-value
          ) 
          anova_pvalue
-         print("multi anova")
       }
       
       ## create reactive variable for user input list of genes

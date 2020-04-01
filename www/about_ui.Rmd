@@ -41,8 +41,8 @@ Explore select publicly available meningioma datasets! Select a tab above to beg
         
   * Analytical Functionality
       + Multigene ANOVA of expression by clinical variable
-      + Visualization Functionality"),
-      + Heatmap and hierarchical clustering of expression")
+      + Visualization Functionality
+      + Heatmap and hierarchical clustering of expression
         
         
 *****
