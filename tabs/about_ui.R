@@ -1,7 +1,6 @@
 tabPanel("About",
-         titlePanel("Information on Data Sources and Details for Use"),
          
-         h5("Thank you for using the Meningioma Visualization Tool."),
+         titlePanel("Information on Data Sources and Details for Use"),
          
          ## horizonal line
          hr(),

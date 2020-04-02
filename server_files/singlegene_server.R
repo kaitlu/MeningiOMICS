@@ -4,6 +4,7 @@
     
     ## find available clinical variables for selected gene
     cv <- reactive({
+      req(input$gene)
               clinical_variables <- character()
               for (i in datasets) {
                 if(input$gene %in% colnames(eval(as.symbol(i))[["expression_data"]])) {
@@ -27,6 +28,8 @@
         
     ## find the available datasets for selected gene and clinical data in ANOVA UI
     ad <- reactive({
+      req(input$gene)
+      req(input$grouping)
         available_datasets <- character()
         for (i in datasets) {
             if(all(c(input$gene, 
@@ -56,16 +59,21 @@
     
     
     ## reactive to pull out gene
-    gv <- reactive({as.symbol(input$gene)
+    gv <- reactive({
+      req(input$gene)
+      as.symbol(input$gene)
     })
     
     ## reactive to pull out dataset
     datasetInput <- reactive({
-        eval(as.symbol(input$dataset))
+      req(input$dataset)  
+      eval(as.symbol(input$dataset))
       })
 
     ## reactive to pull out grouping
-    grp <- reactive({as.symbol(input$grouping)
+    grp <- reactive({
+      req(input$grouping)
+      as.symbol(input$grouping)
       })
 
 
@@ -341,6 +349,7 @@
     
     ## find genes available based on initially selected gene
     g2 <- reactive({
+      req(input$gene)
             second_gene <- character()
             for (i in datasets) {
                                  if(input$gene %in% colnames(eval(as.symbol(i))[["expression_data"]])) {
@@ -368,6 +377,8 @@
     
     ## find the available datasets for selected pairwise genes in correlation UI
     cd <- reactive({
+      req(input$gene)
+      req(input$gene2)
         available_datasets_correlation <- character()
         for (i in datasets) {
                             if(all(c(input$gene, input$gene2) %in% colnames(eval(as.symbol(i))[["data"]])
@@ -396,11 +407,14 @@
     })
     
     ## pull out gene2
-    gv2 <- reactive({as.symbol(input$gene2)
+    gv2 <- reactive({
+      req(input$gene2)
+      as.symbol(input$gene2)
     })
     
     ## pull out dataset
     dataset_correlationInput <- reactive({
+      req(input$dataset_correlation)
         eval(as.symbol(input$dataset_correlation))
     })
     

@@ -6,49 +6,199 @@ output:
     toc_float: true
 ---
 
-## Objective
-      
-The Meningioma Visualization Tool leverages publicly available data in an interactive web application to provide:
 
-* A hub for collective analysis of meningioma data
-* Statistically robust and easily interpretable graphs and analysis
-* A platform for integration of datasets not yet publicly available
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+
+## library
+library(htmlTable)
+```
+
+
+
+## Directions for Use
+        
+All analyses are built to react to user selection and are dynamically generated based on user selection. In the analyses tabs, make selections for variables of interest in order from the top down. Start by selecting a gene or genes of interest. The application will find all of the clinical variables which exist in datasets which contain the gene(s) of interest. Next, select a dataset; the application will only display datasets which have the selected clinical variable. Users can change the selected gene or genes of interest at anytime; the available clincal variables and datasets will be recalculated for selection.
+         
+        
+*****
+        
+## Future Features
+        
+Currently there are no datasets included in the Meningioma Visualization tool available for robust survival analysis. This feature will be added once sufficient data becomes available.
+
+*****
+        
+## A Note on Harmonization and Collective Analysis
+
+Great care was taken to preserve the integrity of each dataset included in the Meningioma Visualization Tool. Variable names and levels of factor variables were altered for some datasets and expression values were log2 transformed during the harmonization stage. Expression values were also centered and scaled for each gene in each experiment to facilitate ease of collective analysis. Because the datasets originated from a variety of experimental designs and were processed on differing platforms, combined analysis is not recommended; as such, the tool does not allow 'pooled' or 'overall' analyses.
 
 *****       
   
-## Get Started
-        
-Explore select publicly available meningioma datasets! Select a tab above to begin. Guide messages appear on screen to guide use, but more information may be found in the 'About' tab.
-        
+## Links to Data Sources
+
+The table below contains links to the GEO Accession page for each dataset.
+
+```{r}
+## names of datasets
+dataset <- c("Clark_V_2016", 
+              "Clark_V",
+              "Schulten_H",
+              "Schmidt_M",
+              "TorresMartin_M",
+              "Yeh_T",
+              "DUrso_O",
+              "Lee_Y",
+              "Keller_A",
+              "Claus_E",
+              "Scheck_A"
+)
+```
+
+```{r}
+## corresponding geoaccession
+geo_accession <- c("GSE58037",
+                   "GSE85135",
+                   "GSE77259",
+                   "GSE74385",
+                   "GSE54934",
+                   "GSE55609",
+                   "GSE16165",
+                   "GSE16581",
+                   "GSE12530",
+                   "GSE9438",
+                   "GSE4780")
+```
+
+```{r}
+## links to data
+geo_link <- c("https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE58037",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE85135",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE77259",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74385",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE54934",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE55609",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE16165",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE16581",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE12530",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE9438",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE4780"
+               )
+```
+
+```{r}
+## table of links
+references <- data.frame(cbind(dataset, geo_accession, geo_link))
+
+library(knitr)
+kable(references)
+```
+
 *****
 
-## Functionality Overview
-        
-### Single Gene Analysis Tab
-        
-  * Analytical Functionality
-      + Summary Statistics
-      + ANOVA of expression by clinical variable
-      + Tukey’s Honest Significant Difference (test of pairwise differences)
-      + Correlation test of association
-              
-         
-  * Visualization Functionality
-      + Visualization of expression by clinical variable boxplot/scatterplot
-      + Pairwise gene correlation plots
+## Summary of Data from Data Sources
+      
+This table describes the data available the datasets included in the Meningioma Visualization Tool.
 
-### Multigene Analysis Tab
+```{r}
+## load datasets to be summarized
+load("~/Documents/Thesis/mgm_eda/datasets/GSE85135_Clark_V_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE58037_Clark_V_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE77259_Schulten_H_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE74385_Schmidt_M_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE54934_Torres-Martin_M_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE55609_Yeh_T_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE16156_DUrso_O_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE16581_Lee_Y_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE12530_Keller_A_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE9438_Claus_E_KO.Rda")
+load("~/Documents/Thesis/mgm_eda/datasets/GSE4780_Scheck_A_KO.Rda")
+```
+
+```{r}
+## load and format table one
+library(dplyr)
+library(Hmisc)
+
+meningioma_datasets <- bind_rows(
+                      Clark_V[["clinical_data"]]        %>% mutate(data_name = "GSE58037") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Clark_V_2016[["clinical_data"]]   %>% mutate(data_name = "GSE85135") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Schulten_H[["clinical_data"]]     %>% mutate(data_name = "GSE77259") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Schmidt_M[["clinical_data"]]      %>% mutate(data_name = "GSE74385") %>% select(-c(1,2)) %>% as.data.frame(),
+                      TorresMartin_M[["clinical_data"]] %>% mutate(data_name = "GSE54934") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Yeh_T[["clinical_data"]]          %>% mutate(data_name = "GSE55609") %>% select(-c(1,2)) %>% as.data.frame(),
+                      DUrso_O[["clinical_data"]]        %>% mutate(data_name = "GSE16165") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Lee_Y[["clinical_data"]]          %>% mutate(data_name = "GSE16581") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Keller_A[["clinical_data"]]       %>% mutate(data_name = "GSE12530") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Claus_E[["clinical_data"]]        %>% mutate(data_name = "GSE9438") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Scheck_A[["clinical_data"]]       %>% mutate(data_name = "GSE4780") %>% select(-c(1,2)) %>% as.data.frame()
+                      )
+
+
+        label(meningioma_datasets$age) <- "Age"
+        label(meningioma_datasets$sex) <- "Sex"
+        label(meningioma_datasets$grade) <- "Grade"
+        label(meningioma_datasets$recurrence) <- "Recurrence"
+        label(meningioma_datasets$recurrence_yrs) <- "Time to Recurrence"
+        label(meningioma_datasets$recurrence_freq) <- "Frequency of Recurrence"
+        label(meningioma_datasets$followup_days) <- "Follow-up Time"
+        label(meningioma_datasets$survival_yrs) <- "Survival Time"
+        label(meningioma_datasets$vital_indicator) <- "Patient Status"
+        label(meningioma_datasets$tissue) <- "Tissue Type"
         
-  * Analytical Functionality
-      + Multigene ANOVA of expression by clinical variable
-      + Visualization Functionality
-      + Heatmap and hierarchical clustering of expression
+        units(meningioma_datasets$recurrence_yrs) <- "years"
+        units(meningioma_datasets$followup_days) <- "days"
+        units(meningioma_datasets$survival_yrs) <- "years"
         
+tableone_meningioma <- meningioma_datasets %>% 
+  mutate(sex = case_when(sex == "m" ~ "Male", 
+                         sex == "f" ~ "Female",
+                         TRUE ~ as.character(sex)
+                         ),
+         recurrence = case_when(recurrence == "primary" ~ "Primary",
+                                recurrence == "recurrent" ~ "Recurrent",
+                                TRUE ~ as.character(recurrence)
+                                ),
+         vital_indicator = case_when(vital_indicator == 1 ~ "Deceased",
+                                     vital_indicator == 0 ~ "Alive",
+                                     TRUE ~ as.character(vital_indicator)
+                                     ),
+         tissue = case_when(tissue == "meningioma" ~ "Meningioma",
+                             tissue == "meninges" ~ "Meninges",
+                             TRUE ~as.character(tissue)
+                             )
+         )
+
+
+        label(tableone_meningioma$age) <- "Age"
+        label(tableone_meningioma$sex) <- "Sex"
+        label(tableone_meningioma$grade) <- "Grade"
+        label(tableone_meningioma$recurrence) <- "Recurrence"
+        label(tableone_meningioma$recurrence_yrs) <- "Time to Recurrence"
+        label(tableone_meningioma$recurrence_freq) <- "Frequency of Recurrence"
+        label(tableone_meningioma$followup_days) <- "Follow-up Time"
+        label(tableone_meningioma$survival_yrs) <- "Survival Time"
+        label(tableone_meningioma$vital_indicator) <- "Patient Status"
+        label(tableone_meningioma$tissue) <- "Tissue Type"
         
-*****
+        units(tableone_meningioma$recurrence_yrs) <- "years"
+        units(tableone_meningioma$followup_days) <- "days"
+        units(tableone_meningioma$survival_yrs) <- "years"
         
-## Questions?
-        
-Contact the authors of the application via email.
+```
+
+```{r}
+# create table
+library(table1)
+table1(data = tableone_meningioma, 
+                ~ age + sex + grade + recurrence + recurrence_yrs + recurrence_freq + followup_days + survival_yrs + vital_indicator + tissue | data_name,
+       rowlabelhead = "Dataset GEO Accession"
+       )
+
+
+```
+
 
 *****

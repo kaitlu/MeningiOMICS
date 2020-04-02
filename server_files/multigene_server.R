@@ -1,5 +1,6 @@
       ## find the available datasets for all selected genes 
       datasets_with_all_genes <- reactive({
+         req(input$gene_user_input)
          available_datasets_multi <- character()
          for (i in datasets) {
             if(all(c(strsplit(input$gene_user_input, split =",")[[1]]) %in% colnames(eval(as.symbol(i))[["data"]])
@@ -18,6 +19,7 @@
       
       # find available clinical variables in available datasets
       multi_cv <- reactive({
+         req(input$gene_user_input)
          clinical_variables <- character()
          for (i in  datasets_with_all_genes()) {
             clinical_variables <- sort(unique(
@@ -45,6 +47,8 @@
       
       ## find the available datasets for selected gene and clinical data in ANOVA UI
       multi_ad <- reactive({
+         req(input$gene_user_input)
+         req(input$multi_grouping)
          genes_clinical_datasets <- character()
          for (i in datasets_with_all_genes()) {
             if(all(c(c(strsplit(input$gene_user_input,split =",")[[1]]),input$multi_grouping) %in% colnames(eval(as.symbol(i))[["data"]]
@@ -78,14 +82,16 @@
                                                         clinical_variable)) # over clinical variables
                         ))
          anova_pvalue <- data.frame(gene_name = as.character(gene),         # gene name
-                                    `p adj` = aov[[1]]$'Pr(>F)'[1]          # extracted p-value
+                                    `pvalue` = aov[[1]]$'Pr(>F)'[1]          # extracted p-value
          ) 
          anova_pvalue
       }
       
       ## create reactive variable for user input list of genes
      
-       gui <- reactive({lapply(                # input comes as a string
+       gui <- reactive({
+          req(input$gene_user_input)
+          lapply(                # input comes as a string
          as.list(                            # need to feed multi_anova a list
             strsplit(input$gene_user_input,  # parse user input
                      split =","              # by comma
@@ -94,16 +100,26 @@
           })
       
       ## create reactive variable for clinical variable
-      cvui <- reactive({as.symbol(input$multi_grouping)})
+      cvui <- reactive({
+         req(input$multi_grouping)
+         as.symbol(input$multi_grouping)
+         })
       
       ## create reactive variable for dataset
-      dui <- reactive({eval(as.symbol(input$multi_dataset))})
+      dui <- reactive({
+         req(input$gene_user_input)
+         req(input$multi_grouping)
+         eval(as.symbol(input$multi_dataset))})
       
       ## create reactive variable for dataset
       sig <- reactive({input$sig_level})
       
       ## output results from user input gene list to an object
-      multianova_out <-reactive({invisible(                          # prevent lapply from printing
+      multianova_out <-reactive({
+         req(input$gene_user_input)
+         req(input$multi_grouping)
+         req(input$multi_dataset)
+                                invisible(                          # prevent lapply from printing
                                 lapply(                             # use user list and apply function
                                    gui(),                           # created reactive variable list 
                                    FUN = multi_anova,                          # function is the multi_anova
@@ -115,11 +131,14 @@
       
       
       ## bind results into a table to use in the datatable - reactive to user input
-      multianova_table <- reactive(
+      multianova_table <- reactive({
+         req(input$gene_user_input)
+         req(input$multi_grouping)
+         req(input$multi_dataset)
          do.call(rbind,            # lists are fun - do call allows rbind to work 
                  multianova_out()  # bind the gene and anova results
          )
-      )
+      })
       
       # title for multigene anova
       output$multianova_results_title <- renderText({validate(
@@ -142,8 +161,18 @@
       
       
       # copy and pastable text of genes significant at the selected alpha level
-      filtered_results <- reactive(multianova_table()  %>% filter(p.adj<sig())) # edit this to have selectable alpha
-      significant_genes <- reactive(as.character(filtered_results()$gene_name))
+      filtered_results <- reactive({
+         req(input$gene_user_input)
+         req(input$multi_grouping)
+         req(input$multi_dataset)
+         multianova_table()  %>% filter(pvalue<sig())
+         }) 
+      
+      significant_genes <- reactive({
+         req(input$gene_user_input)
+         req(input$multi_grouping)
+         req(input$multi_dataset)
+         as.character(filtered_results()$gene_name)})
       
       output$signficant_list_title <- renderText({
          validate(
@@ -176,6 +205,12 @@
                     xlab = "Gene",
                     main = "Gene Expression Heatmap",
                     key.title = "Expression",
-                    showticklabels = c(T,F)
-                                                )
+                    showticklabels = c(T,F),
+                    plot_method = "plotly",
+                    side_color_colorbar_len = .3,
+                    colorbar_len = .4,
+                    colorbar_xpos = 1.02,
+                    colorbar_ypos = 0
+          )
+                                                
       })

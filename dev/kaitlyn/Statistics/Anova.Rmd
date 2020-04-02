@@ -234,6 +234,9 @@ summ2 <- lee %>%
                )
 summ2
 
+test <- summary(aov(data = lee, PTTG1 ~ grade))
+
+test # pvalue small
 ```
 
 ```{r}
