@@ -1,6 +1,13 @@
 ## this file contains all server functions for the single gene analysis tab
     
 ## anova and plots
+
+    ## server side load of all gene options for input
+    updateSelectizeInput(session = session,
+                         inputId = "gene",
+                         choices = gene,
+                         selected = FALSE,
+                         server = TRUE)
     
     ## find available clinical variables for selected gene
     cv <- reactive({
@@ -22,7 +29,9 @@
       updateSelectizeInput(session = session,
                       inputId = "grouping",
                       label = NULL,
-                      choices = cv()
+                      choices = cv(),
+                      selected = FALSE,
+                      server = TRUE
                       )
     })
         
@@ -53,7 +62,9 @@
       updateSelectizeInput(session,
                           inputId = "dataset",
                           label = NULL,
-                          choices = ad()
+                          choices = ad(),
+                          selected = FALSE,
+                          server = TRUE
         )
     })
     
@@ -420,17 +431,11 @@
     g2 <- reactive({
       req(input$gene)
             second_gene <- character()
-            for (i in datasets) {
-                                 if(input$gene %in% colnames(eval(as.symbol(i))[["expression_data"]])) {
-                                       second_gene <- sort(unique(
-                                                                  c(second_gene,
-                                                                    colnames(eval(as.symbol(i))[["expression_data"]])
-                                                                    )
-                                                                )
-                                       )
+            for (i in datasets) { colnames_gene1_corr <- colnames(eval(as.symbol(i))[["expression_data"]])
+                                 if(input$gene %in% colnames_gene1_corr) {
+                                       second_gene <- colnames_gene1_corr }
             }
-        }
-        return(second_gene)
+        return(sort(unique(second_gene)))
     })
     
     ## populate the available second genes for initially selected gene in UI
@@ -439,7 +444,9 @@
         updateSelectizeInput(session,
                              inputId = "gene2",
                              label = NULL,
-                             choices = g2()
+                             choices = g2(),
+                             selected = FALSE,
+                             server = TRUE
         )
     })
     
@@ -471,6 +478,7 @@
         updateSelectizeInput(session,
                              inputId = "dataset_correlation",
                              label = NULL,
+                             selected = FALSE,
                              choices = cd()
         )
     })

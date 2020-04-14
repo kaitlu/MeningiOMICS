@@ -9,7 +9,7 @@ output: html_document
 library(heatmaply)
 library(dplyr)
 library(plotly)
-load("datasets/GSE74385_Schmidt_M_KO.Rda")
+load("/home/kaitlynoshea/Documents/Thesis/mgm_eda/datasets/GSE74385_Schmidt_M_KO.Rda")
 ```
 
 
@@ -46,7 +46,7 @@ heatmaply(
   colorbar_len = .4,
   colorbar_xpos = 1.02,
   colorbar_ypos = 0,
-  colors = cividis
+  row_side_palette = Spectral
 )
 ```
 
