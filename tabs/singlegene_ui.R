@@ -38,7 +38,11 @@ tabPanel(title = "Single Gene Analysis",
                                                 placeholder = 'Please select an option below',
                                                 onInitialize = I('function() { this.setValue(""); }')
                                             )
-                             )
+                             ),
+                             
+                             ## download button for correlation data
+                             downloadButton("downloadGenePhenoDataset", "Download Selected Data"),
+                             
             ),
             
             conditionalPanel(condition="input.tabselected==2",   # sidebar panel for when correlation tab is selected
@@ -62,7 +66,11 @@ tabPanel(title = "Single Gene Analysis",
                                                 placeholder = 'Please select an option below',
                                                 onInitialize = I('function() { this.setValue(""); }')
                                             )
-                             )
+                             ),
+                             
+                             ## download button for correlation data
+                             downloadButton("downloadPairwiseCorrelationDataset", "Download Selected Data"),
+                             
             )
         ),
         
@@ -105,6 +113,9 @@ tabPanel(title = "Single Gene Analysis",
                                      )
                                  ),
                                  
+                                 ## download gene-pheno type results button
+                                 downloadButton('downloadGenePhenoResults', 'Download These Results'),
+                                 
                                  ## horizontal line
                                  hr(),
                                  
@@ -126,7 +137,11 @@ tabPanel(title = "Single Gene Analysis",
                                          "Spearman's Correlation Coefficient",
                                          tableOutput("correlation_table")
                                      )
-                                 )
+                                 ),
+                                 
+                                 ## download button for correlation data
+                                 downloadButton("downloadPairwiseCorrelationResult", "Download This Table"),
+                                 
                         ),
                         
                         id = "tabselected"                   ## id for these tabpanel values

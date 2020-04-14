@@ -156,10 +156,11 @@ Keller_A <- list(
                  dataset_info = gse12530_info,             # metatag
                  clinical_data = gse12530_pheno,           # clinical data
                  expression_data = gse12530_rna,           # expression data
-                 data = gse12530_data,                     # combined, workable data
-                 full_GEO = gse12530                       # full original download from GEO
+                 data = gse12530_data #,                     # combined, workable data
+              #   full_GEO = gse12530                       # full original download from GEO
                  )                
 ```
+
 ```{r}
 save(Keller_A, file = here("datasets","GSE12530_Keller_A_KO.Rda")) 
 ```

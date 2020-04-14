@@ -163,8 +163,8 @@ TorresMartin_M <- list(
                        dataset_info = gse54934_info,             # metatag
                        clinical_data = gse54934_pheno,           # clinical data
                        expression_data = gse54934_rna,           # expression data
-                       data = gse54934_data,                     # combined, workable data
-                       full_GEO = gse54934                       # full original download from GEO
+                       data = gse54934_data#,                     # combined, workable data
+                    #   full_GEO = gse54934                       # full original download from GEO
                        )
 ```
 ```{r}

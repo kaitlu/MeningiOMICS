@@ -26,7 +26,8 @@ tabPanel(title = "Multigene Analysis",
                                             label = "Genes",
                                             value = NULL,
                                             placeholder = 'Please paste a comma seperated list of genes of interest'
-                                  ),
+                                  )
+                                 
                  ),
                                   
              
@@ -62,10 +63,22 @@ tabPanel(title = "Multigene Analysis",
                                                              .1
                                                              ),
                                                  selected = .05
-                                                 )
+                                                 )#,
                                   
-                 )
+                 ),
                  
+                 conditionalPanel(condition="input.panelselected==1",   # sidebar panel for when multigeneAVOVA tab is selected
+                                  
+                                  ## download Heatmap dataset button
+                                  downloadButton('downloadMultigeneAnovaDataset', "Download Selected Data")
+                 ),
+                 
+                 
+                 conditionalPanel(condition="input.panelselected==2",   # sidebar panel for when heatmap tab is selected
+                                  
+                                  ## download Heatmap dataset button
+                                  downloadButton('downloadHeatmapDataset', "Download Selected Data")
+                 )
                  
              ),
                  
@@ -78,6 +91,10 @@ tabPanel(title = "Multigene Analysis",
                              value = 1,                               ## multi anova tab value = 3
                              h3(textOutput("multianova_results_title")),
                              dataTableOutput("multianova_results"),   ## output results of multiple
+                             
+                             
+                             ## put the following on the same row
+                             downloadButton("downloadMultigeneAnovaResults", "Download Multigene Anova Results Table"),
                              
                              ## horizonal line
                              hr(),
@@ -95,9 +112,11 @@ tabPanel(title = "Multigene Analysis",
                              )
                     ),
                     
-                    tabPanel(title = "Heatmap and Hierarchial Clustering of Gene Expression by Clinical Variables",
+                    tabPanel(title = "Heatmap and Hierarchical Clustering of Gene Expression",
                              value = 2,
-                             plotlyOutput("heatmap")
+                             plotlyOutput("heatmap"),
+                             
+                             
                     ),
                     
                     id = "panelselected" 

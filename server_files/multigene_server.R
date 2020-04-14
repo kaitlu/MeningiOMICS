@@ -142,22 +142,51 @@
       
       # title for multigene anova
       output$multianova_results_title <- renderText({validate(
-         need(input$gene_user_input != '', message = "Please enter comma seperated genes of interest"),
+         need(input$gene_user_input != '', message = FALSE),
          need(input$multi_grouping != '', message = FALSE),
          need(input$multi_dataset != '', message = FALSE)
       )
          paste0("Results of ANOVA")
       })
       
-      # datatable output of all multiple anova results
+      # datatable output of all multianova results
       output$multianova_results <- renderDataTable({
          validate(
             need(input$gene_user_input != '', message = "Please enter comma seperated genes of interest"),
-            need(input$multi_grouping != '', message = FALSE),
-            need(input$multi_dataset != '', message = FALSE)
+            need(input$multi_grouping != '', message = "Please choose a clinical variable."),
+            need(input$multi_dataset != '', message = "Please choose a dataset")
          )
          datatable(multianova_table())
       })
+      
+      # downloadable output of all multianova results
+      output$downloadMultigeneAnovaResults <- downloadHandler(
+         filename = function() {
+            paste(input$multi_grouping, "_", input$multi_dataset, "_multigeneANOVAResults.csv", sep = "")
+         },
+         content = function(file) {
+            write.csv(multianova_table(), file, row.names = FALSE)
+         }
+      )
+      
+      ## downloadable dataset for the genes in the multigene anova dataset, plus clinical
+      multigeneANOVA_dataset <- reactive({
+         req(input$gene_user_input)
+         req(input$multi_grouping)
+         req(input$multi_dataset)
+         
+         dui()[["data"]] %>% select(as.character(strsplit(input$gene_user_input, split =",")[[1]]),
+                                    input$multi_grouping)
+      })
+      
+      output$downloadMultigeneAnovaDataset <- downloadHandler(
+         filename = function() {
+            paste(input$multi_grouping, "_", input$multi_dataset,  "_multigeneANOVADataset.csv", sep = "")
+         },
+         content = function(file) {
+            write.csv(multigeneANOVA_dataset(), file, row.names = FALSE)
+         }
+      )
       
       
       # copy and pastable text of genes significant at the selected alpha level
@@ -194,23 +223,48 @@
       
       
       #### heatmap
+      heatmap <- reactive({ 
+         
+         heatmaply(x = dui()[["data"]] %>% select(as.character(strsplit(input$significant_gene_user_input, split =",")[[1]])),
+                                      RowSideColors = dui()[["data"]] %>% select(input$multi_grouping),
+                                      xlab = "Gene",
+                                      main = "Gene Expression Heatmap",
+                                      key.title = "Expression",
+                                      showticklabels = c(T,F),
+                                      plot_method = "plotly",
+                                      side_color_colorbar_len = .3,
+                                      colorbar_len = .4,
+                                      colorbar_xpos = 1.02,
+                                      colorbar_ypos = 0,
+                                      row_side_palette = Spectral
+                                      )
+         })
+      
       output$heatmap <- renderPlotly({
          validate(
-            need(input$significant_gene_user_input != '', message = FALSE),
-            need(input$multi_grouping != '', message = FALSE),
-            need(input$multi_dataset != '', message = FALSE)
-         )
-          heatmaply(x = dui()[["data"]] %>% select(as.character(strsplit(input$significant_gene_user_input, split =",")[[1]])),
-                    RowSideColors = dui()[["data"]] %>% select(input$multi_grouping),
-                    xlab = "Gene",
-                    main = "Gene Expression Heatmap",
-                    key.title = "Expression",
-                    showticklabels = c(T,F),
-                    plot_method = "plotly",
-                    side_color_colorbar_len = .3,
-                    colorbar_len = .4,
-                    colorbar_xpos = 1.02,
-                    colorbar_ypos = 0
-          )
+            need(input$significant_gene_user_input != '',  message = "Please enter comma seperated genes of interest"),
+            need(input$multi_grouping != '', message =   "Please choose a clinical variable."),
+            need(input$multi_dataset != '', message = "Please choose a dataset")
+            )
+          heatmap()
                                                 
       })
+      
+      ## downloadable dataset for the genes in the heatmap dataset, plus clinical
+      heatmap_dataset <- reactive({
+         req(input$significant_gene_user_input)
+         req(input$multi_grouping)
+         req(input$multi_dataset)
+         
+         dui()[["data"]] %>% select(as.character(strsplit(input$significant_gene_user_input, split =",")[[1]]),
+                                                 input$multi_grouping)
+      })
+      
+      output$downloadHeatmapDataset <- downloadHandler(
+         filename = function() {
+            paste(input$multi_grouping, "_", input$multi_dataset,  "_", "HeatmapDataset.csv", sep = "")
+         },
+         content = function(file) {
+            write.csv(heatmap_dataset(), file, row.names = FALSE)
+         }
+      )

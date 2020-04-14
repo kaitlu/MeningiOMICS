@@ -165,10 +165,11 @@ Lee_Y <- list(
               dataset_info = gse16581_info,             # metatag
               clinical_data = gse16581_pheno,           # clinical data
               expression_data = gse16581_rna,           # expression data
-              data = gse16581_data,                     # combined, workable data
-              full_GEO = gse16581                       # full original download from GEO
+              data = gse16581_data #,                     # combined, workable data
+            #  full_GEO = gse16581                       # full original download from GEO
               )
 ```
+
 ```{r}
 save(Lee_Y, file = here("datasets","GSE16581_Lee_Y_KO.Rda"))
 ```

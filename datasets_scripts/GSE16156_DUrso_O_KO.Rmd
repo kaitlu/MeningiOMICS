@@ -154,8 +154,8 @@ DUrso_O <- list(
                    dataset_info = gse16156_info,             # metatag
                    clinical_data = gse16156_pheno,           # clinical data
                    expression_data = gse16156_rna,           # expression data
-                   data = gse16156_data,                     # combined, workable data
-                   full_GEO = gse16156                       # full original download from GEO
+                   data = gse16156_data #,                     # combined, workable data
+                 #  full_GEO = gse16156                       # full original download from GEO
                    )
 ```
 ```{r}

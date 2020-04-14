@@ -164,8 +164,8 @@ Scheck_A <- list(
                    dataset_info = gse4780_info,             # metatag
                    clinical_data = gse4780_pheno,           # clinical data
                    expression_data = gse4780_rna,           # expression data
-                   data = gse4780_data,                     # combined, workable data
-                   full_GEO = gse4780                       # full original download from GEO
+                   data = gse4780_data#,                     # combined, workable data
+               #    full_GEO = gse4780                       # full original download from GEO
                    )
 ```
 
