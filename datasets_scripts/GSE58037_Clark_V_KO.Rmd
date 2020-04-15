@@ -158,7 +158,7 @@ gse58037_info <-
                      )
 
 ## create dataset as list 
-Clark_V <- list(
+Clark_V_2013 <- list(
                 dataset_info = gse58037_info,             # metatag
                 clinical_data = gse58037_pheno,           # clinical data
                 expression_data = gse58037_rna,           # expression data
@@ -167,5 +167,5 @@ Clark_V <- list(
 )
 ```
 ```{r}
-save(Clark_V, file = here("datasets","GSE58037_Clark_V_KO.Rda")) 
+save(Clark_V_2013, file = here("datasets","GSE58037_Clark_V_KO.Rda")) 
 ```

@@ -43,13 +43,13 @@ load("~/Documents/Thesis/mgm_eda/datasets/GSE4780_Scheck_A_KO.Rda")
 
 ```{r include=FALSE}
 meningioma_datasets <- bind_rows(
-                      Clark_V[["clinical_data"]]        %>% mutate(data_name = "GSE58037") %>% select(-c(1,2)) %>% as.data.frame(),
+                      Clark_V_2013[["clinical_data"]]   %>% mutate(data_name = "GSE58037") %>% select(-c(1,2)) %>% as.data.frame(),
                       Clark_V_2016[["clinical_data"]]   %>% mutate(data_name = "GSE85135") %>% select(-c(1,2)) %>% as.data.frame(),
                       Schulten_H[["clinical_data"]]     %>% mutate(data_name = "GSE77259") %>% select(-c(1,2)) %>% as.data.frame(),
                       Schmidt_M[["clinical_data"]]      %>% mutate(data_name = "GSE74385") %>% select(-c(1,2)) %>% as.data.frame(),
                       TorresMartin_M[["clinical_data"]] %>% mutate(data_name = "GSE54934") %>% select(-c(1,2)) %>% as.data.frame(),
                       Yeh_T[["clinical_data"]]          %>% mutate(data_name = "GSE55609") %>% select(-c(1,2)) %>% as.data.frame(),
-                      DUrso_O[["clinical_data"]]        %>% mutate(data_name = "GSE16165") %>% select(-c(1,2)) %>% as.data.frame(),
+                      DUrso_O[["clinical_data"]]        %>% mutate(data_name = "GSE16156") %>% select(-c(1,2)) %>% as.data.frame(),
                       Lee_Y[["clinical_data"]]          %>% mutate(data_name = "GSE16581") %>% select(-c(1,2)) %>% as.data.frame(),
                       Keller_A[["clinical_data"]]       %>% mutate(data_name = "GSE12530") %>% select(-c(1,2)) %>% as.data.frame(),
                       Claus_E[["clinical_data"]]        %>% mutate(data_name = "GSE9438") %>% select(-c(1,2)) %>% as.data.frame(),

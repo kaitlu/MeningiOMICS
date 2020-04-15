@@ -111,7 +111,7 @@ tabPanel(title = "Single Gene Analysis",
                                  ),
                                  
                                  ## download gene-pheno type results button
-                                 downloadButton('downloadGenePhenoResults', 'Download These Results'),
+                                 downloadButton('downloadGenePhenoResults', 'Download These Tables'),
                                  
                                  ## horizontal line
                                  hr(),
