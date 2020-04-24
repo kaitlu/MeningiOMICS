@@ -1,0 +1,70 @@
+---
+title: "GSE136661"
+author: "Kaitlyn O'Shea"
+date: "4/21/2020"
+output: html_document
+---
+
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE)
+```
+
+```{r install_packages, eval = FALSE}
+## require BioManager
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("GEOquery") 
+```
+
+```{r libraries, message=FALSE, warning=FALSE}
+## libraries needed
+library("tidyverse")
+library("GEOquery")
+library("here")
+```
+
+## Get GSE136661 from GEO
+```{r Geo_download, message=FALSE, warning=FALSE}
+## Download dataset from GEO, save downloaded files in the same folder as this .Rmd file.
+dir.create(file.path("raw","GSE136661"), recursive = TRUE)
+GSE136661 <- getGEO("GSE136661",  # sample accession 
+                   destdir = file.path("raw","GSE136661"),
+                   GSEMatrix = TRUE,
+                   AnnotGPL = TRUE)
+```
+
+## Clinical Data from Dataset
+```{r ClinicalDataExtract}
+## index into data list and extract clinical data
+GSE136661_cd <-
+                  GSE136661[["GSE136661_series_matrix.txt.gz"]] %>%           # index into list 
+                  phenoData()# %>%             # select phenoData
+#                   pData() %>%                 # apply pData
+#                   as_tibble() %>%             # tidy friendly
+#                   select("geo_accession" = geo_accession,
+#                          "sample_id" = title, 
+#                          "age" = `AGE:ch1`,
+#                          "sex" = `SEX:ch1`,
+#                          "grade" = `WHO:ch1`,
+#                          "histology" = `HIST:ch1`
+#                          ) 
+# 
+# gse12530_pheno <- gse12530_cd %>%         # rename and adjust variables
+#                      mutate(
+#                             "age" = as.numeric(age),
+#                             "sex" = factor(sex, 
+#                                            levels = c("Male", "Female"), 
+#                                            labels = c("m", "f")
+#                                            ),
+#                             "grade" = factor(grade, 
+#                                              levels = c("1", "2", "3"), 
+#                                              labels = c("I", "II", "III")
+#                                              ),
+#                             "tissue" = "meningioma"
+#                         ) %>%
+#                       mutate_if(is.character, as.factor)
+```
+
+

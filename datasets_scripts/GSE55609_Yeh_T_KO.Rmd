@@ -147,8 +147,8 @@ Yeh_T <- list(
               dataset_info = gse55609_info,             # metatag
               clinical_data = gse55609_pheno,           # clinical data
               expression_data = gse55609_rna,           # expression data
-              data = gse55609_data,                     # combined, workable data
-              full_GEO = gse55609                       # full original download from GEO
+              data = gse55609_data#,                     # combined, workable data
+          #    full_GEO = gse55609                       # full original download from GEO
               )
 ```
 ```{r}

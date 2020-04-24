@@ -8,7 +8,8 @@ output: html_document
 ```{r}
 library(heatmaply)
 library(dplyr)
-load("datasets/GSE74385_Schmidt_M_KO.Rda")
+library(plotly)
+load("/home/kaitlynoshea/Documents/Thesis/mgm_eda/datasets/GSE74385_Schmidt_M_KO.Rda")
 ```
 
 
@@ -23,8 +24,8 @@ schm3 <- schm2 %>% select(NEUROD1,PAX4,INSM1,"NKX2-2",NEUROG3)
 schm4 <- schm2 %>% select(PTTG1, A2M, F3, FGFR1, FGF4, NF1, NF2, TP53, EGFR, IDH1, IDH2, TERT, HNF1A)
 
 ## euchlidean distance matrix
-d <- dist(schm3, method = "euclidean")
-
+d <- dist(schm3)
+d
 ## dendrogram
 cluster <- hclust(d)
 plot(cluster)
@@ -35,19 +36,25 @@ plot(cluster)
 ## heatmap
 heatmaply(
   schm3,
-  row_side_colors = data.frame(grade), fontsize_col = 10,fontsize_row = 8,
+  row_side_colors = data.frame("grade" = grade, check.names = FALSE),
   xlab = "Gene",
   main = "Gene Expression Heatmap",
   key.title = "Expression",
-  showticklabels = c(T,F)
-  ) 
+  showticklabels = c(T,F),
+  plot_method = "plotly",
+  side_color_colorbar_len = .3,
+  colorbar_len = .4,
+  colorbar_xpos = 1.02,
+  colorbar_ypos = 0,
+  row_side_palette = Spectral
+)
 ```
 
 ```{r}
 plot_ly(x = colnames(schm3),
         y = grade,
         
-  z = schm3,
+  z = d,
         type = "heatmap")
 ```
 
@@ -72,5 +79,15 @@ heatmaply(
   RowSideColors = grade,
   Rowv = grade
 )
+```
+
+
+```{r}
+## d3heatmap
+library(d3heatmap)
+d3heatmap(x = schm3, 
+          distfun = dist,
+          hclustfun = hclust,
+          dendrogram = "both")
 ```
 

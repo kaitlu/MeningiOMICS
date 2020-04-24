@@ -159,8 +159,8 @@ Schmidt_M <- list(
                   dataset_info = gse74385_info,             # metatag
                   clinical_data = gse74385_pheno,           # clinical data
                   expression_data = gse74385_rna,           # expression data
-                  data = gse74385_data,                     # combined, workable data
-                  full_GEO = gse74385                       # full original download from GEO
+                  data = gse74385_data #,                     # combined, workable data
+               #   full_GEO = gse74385                       # full original download from GEO
                   )
 ```
 

@@ -161,8 +161,8 @@ Schulten_H <- list(
                 dataset_info = gse77259_info,             # metatag
                 clinical_data = gse77259_pheno,           # clinical data
                 expression_data = gse77259_rna,           # expression data
-                data = gse77259_data,                     # combined, workable data
-                full_GEO = gse77259                       # full original download from GEO
+                data = gse77259_data#,                     # combined, workable data
+             #   full_GEO = gse77259                       # full original download from GEO
                 )
 ```
 ```{r}

@@ -143,8 +143,8 @@ Claus_E <- list(
                 dataset_info = gse9438_info,             # metatag
                 clinical_data = gse9438_pheno,           # clinical data
                 expression_data = gse9438_rna,           # expression data
-                data = gse9438_data,                     # combined, workable data
-                full_GEO = gse9438                       # full original download from GEO
+                data = gse9438_data #,                     # combined, workable data
+           #     full_GEO = gse9438                       # full original download from GEO
                 )
 ```
 

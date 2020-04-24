@@ -9,7 +9,7 @@ tabPanel(title = "Single Gene Analysis",
             ## select gene to group by
             selectizeInput(inputId = "gene",
                            label = "Select a Gene",
-                           choices = gene,
+                           choices = NULL,
                            options = list(
                                placeholder = 'Please select an option below',
                                onInitialize = I('function() { this.setValue(""); }')
@@ -22,7 +22,6 @@ tabPanel(title = "Single Gene Analysis",
                              selectizeInput(inputId = "grouping",
                                             label = "Select variable to analyze",
                                             choices = NULL,
-                                            selected = NULL,
                                             options = list(
                                                 placeholder = 'Please select an option below',
                                                 onInitialize = I('function() { this.setValue(""); }')
@@ -33,12 +32,15 @@ tabPanel(title = "Single Gene Analysis",
                              selectizeInput("dataset",
                                             label = "Select a dataset", 
                                             choices = NULL,
-                                            selected = NULL,
                                             options = list(
                                                 placeholder = 'Please select an option below',
                                                 onInitialize = I('function() { this.setValue(""); }')
                                             )
-                             )
+                             ),
+                             
+                             ## download button for correlation data
+                             downloadButton("downloadGenePhenoDataset", "Download Selected Data"),
+                             
             ),
             
             conditionalPanel(condition="input.tabselected==2",   # sidebar panel for when correlation tab is selected
@@ -46,7 +48,7 @@ tabPanel(title = "Single Gene Analysis",
                              ## select a gene for pairwise correlation
                              selectizeInput(inputId = "gene2",
                                             label = "Gene",
-                                            choices = gene,
+                                            choices = NULL,
                                             options = list(
                                                 placeholder = 'Please select an option below',
                                                 onInitialize = I('function() { this.setValue(""); }')
@@ -57,12 +59,15 @@ tabPanel(title = "Single Gene Analysis",
                              selectizeInput(inputId = "dataset_correlation",
                                             label = "Select a dataset", 
                                             choices = NULL,
-                                            selected = NULL,
                                             options = list(
                                                 placeholder = 'Please select an option below',
                                                 onInitialize = I('function() { this.setValue(""); }')
                                             )
-                             )
+                             ),
+                             
+                             ## download button for correlation data
+                             downloadButton("downloadPairwiseCorrelationDataset", "Download Selected Data"),
+                             
             )
         ),
         
@@ -105,6 +110,9 @@ tabPanel(title = "Single Gene Analysis",
                                      )
                                  ),
                                  
+                                 ## download gene-pheno type results button
+                                 downloadButton('downloadGenePhenoResults', 'Download These Tables'),
+                                 
                                  ## horizontal line
                                  hr(),
                                  
@@ -126,7 +134,11 @@ tabPanel(title = "Single Gene Analysis",
                                          "Spearman's Correlation Coefficient",
                                          tableOutput("correlation_table")
                                      )
-                                 )
+                                 ),
+                                 
+                                 ## download button for correlation data
+                                 downloadButton("downloadPairwiseCorrelationResult", "Download This Table"),
+                                 
                         ),
                         
                         id = "tabselected"                   ## id for these tabpanel values

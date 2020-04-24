@@ -1,0 +1,59 @@
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+dataset <- c("Clark_V_2013",
+             "Clark_V_2016",
+              "Schulten_H",
+              "Schmidt_M",
+              "TorresMartin_M",
+              "Yeh_T",
+              "DUrso_O",
+              "Lee_Y",
+              "Keller_A",
+              "Claus_E",
+              "Scheck_A"
+)
+```
+
+```{r}
+geo_accession <- c("GSE58037",
+                   "GSE85135",
+                   "GSE77259",
+                   "GSE74385",
+                   "GSE54934",
+                   "GSE55609",
+                   "GSE16156",
+                   "GSE16581",
+                   "GSE12530",
+                   "GSE9438",
+                   "GSE4780")
+```
+
+```{r}
+geo_link <- c("https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE58037",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE85135",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE77259",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74385",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE54934",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE55609",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE16165",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE16581",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE12530",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE9438",
+               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE4780"
+               )
+```
+
+```{r}
+references <- data.frame(cbind(dataset, geo_accession, geo_link))
+```
+
+```{r}
+library(knitr)
+kable(references)
+```
+

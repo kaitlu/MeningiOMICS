@@ -153,8 +153,8 @@ Clark_V_2016 <- list(
                 dataset_info = gse85135_info,             # metatag
                 clinical_data = gse85135_pheno,           # clinical data
                 expression_data = gse85135_rna,           # expression data
-                data = gse85135_data,                     # combined, workable data
-                full_GEO = gse85135                       # full original download from GEO
+                data = gse85135_data #,                     # combined, workable data
+       #         full_GEO = gse85135                       # full original download from GEO
             )
 ```
 ```{r}

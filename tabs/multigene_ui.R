@@ -11,9 +11,9 @@ tabPanel(title = "Multigene Analysis",
                                   
                                   ## feild for users to paste in selections 
                                   textInput(inputId = "gene_user_input",
-                                            label = "Genes",
+                                            label = "Genes of interest",
                                             value = NULL,
-                                            placeholder = 'Please paste a comma seperated list of genes of interest'
+                                            placeholder = 'Comma, tab, bar, or semicolon seperated list of genes of interest'
                                   )
                                   
                                   
@@ -26,7 +26,8 @@ tabPanel(title = "Multigene Analysis",
                                             label = "Genes",
                                             value = NULL,
                                             placeholder = 'Please paste a comma seperated list of genes of interest'
-                                  ),
+                                  )
+                                 
                  ),
                                   
              
@@ -62,10 +63,22 @@ tabPanel(title = "Multigene Analysis",
                                                              .1
                                                              ),
                                                  selected = .05
-                                                 )
+                                                 )#,
                                   
-                 )
+                 ),
                  
+                 conditionalPanel(condition="input.panelselected==1",   # sidebar panel for when multigeneAVOVA tab is selected
+                                  
+                                  ## download Heatmap dataset button
+                                  downloadButton('downloadMultigeneAnovaDataset', "Download Selected Data")
+                 ),
+                 
+                 
+                 conditionalPanel(condition="input.panelselected==2",   # sidebar panel for when heatmap tab is selected
+                                  
+                                  ## download Heatmap dataset button
+                                  downloadButton('downloadHeatmapDataset', "Download Selected Data")
+                 )
                  
              ),
                  
@@ -74,10 +87,14 @@ tabPanel(title = "Multigene Analysis",
         ## tabs to display
         tabsetPanel(type = "tabs",
                     
-                    tabPanel("Multigene Anova",            ## create tab for multiple anovas table out put
+                    tabPanel("Multigene ANOVA",            ## create tab for multiple anovas table out put
                              value = 1,                               ## multi anova tab value = 3
                              h3(textOutput("multianova_results_title")),
                              dataTableOutput("multianova_results"),   ## output results of multiple
+                             
+                             
+                             ## put the following on the same row
+                             downloadButton("downloadMultigeneAnovaResults", "Download Multigene Anova Results Table"),
                              
                              ## horizonal line
                              hr(),
@@ -87,17 +104,22 @@ tabPanel(title = "Multigene Analysis",
                                  
                                  ## create space for summary table
                                  column(12,
-                                        h3(textOutput("signficant_list_title")),
+                                        h3("Significantly Differentially Expressed Genes"),
                                         "Copy Genes Below For Use in the Heatmap Tab",
-                                        code(textOutput("significant_list"))
+                                        pre(textOutput("significant_list")),
                                         
+                                        ## button to copy to clipboard
+                                        rclipboardSetup(),
+                                        uiOutput("clipboard")
                                  )
                              )
                     ),
                     
-                    tabPanel(title = "Heatmap and Hierarchial Clustering of Gene Expression by Clinical Variables",
+                    tabPanel(title = "Heatmap and Hierarchical Clustering of Gene Expression",
                              value = 2,
-                             plotlyOutput("heatmap")
+                             plotlyOutput("heatmap"),
+                             
+                             
                     ),
                     
                     id = "panelselected" 
