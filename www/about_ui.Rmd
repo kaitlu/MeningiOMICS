@@ -11,9 +11,15 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
 
+``` {r}
 ## library
 library(htmlTable)
+library(table1)
+library(dplyr)
+library(Hmisc)
 ```
 
 
@@ -27,13 +33,13 @@ All analyses are built to react to user selection and are dynamically generated 
         
 ## Future Features
         
-Currently there are no datasets included in the Meningioma Visualization tool available for robust survival analysis. This feature will be added once sufficient data becomes available.
+Currently there are no datasets included in MeningiOMICS available for robust survival analysis. This feature will be added once sufficient data becomes available.
 
 *****
         
 ## A Note on Harmonization and Collective Analysis
 
-Great care was taken to preserve the integrity of each dataset included in the Meningioma Visualization Tool. Variable names and levels of factor variables were altered for some datasets and expression values were log2 transformed during the harmonization stage. Expression values were also centered and scaled for each gene in each experiment to facilitate ease of collective analysis. Because the datasets originated from a variety of experimental designs and were processed on differing platforms, combined analysis is not recommended; as such, the tool does not allow 'pooled' or 'overall' analyses.
+Great care was taken to preserve the integrity of each dataset included in MeningiOMICS. Variable names and levels of factor variables were altered for some datasets and expression values were log2 transformed during the harmonization stage. Expression values were also centered and scaled for each gene in each experiment to facilitate ease of collective analysis. Because the datasets originated from a variety of experimental designs and were processed on differing platforms, combined analysis is not recommended; as such, the tool does not allow 'pooled' or 'overall' analyses.
 
 *****       
   
@@ -100,27 +106,33 @@ kable(references)
 
 ## Summary of Data from Data Sources
       
-This table describes the data available the datasets included in the Meningioma Visualization Tool.
+This table describes the data available the datasets included in MeningiOMICS.
 
 ```{r}
 ## load datasets to be summarized
-load("~/Documents/Thesis/mgm_eda/datasets/GSE85135_Clark_V_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE58037_Clark_V_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE77259_Schulten_H_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE74385_Schmidt_M_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE54934_Torres-Martin_M_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE55609_Yeh_T_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE16156_DUrso_O_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE16581_Lee_Y_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE12530_Keller_A_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE9438_Claus_E_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE4780_Scheck_A_KO.Rda")
+datasets_load <- c( "datasets/GSE85135_Clark_V_KO.Rda", # find all files in this directory to load rather than hard 
+                    "datasets/GSE58037_Clark_V_KO.Rda", # coding in the future
+                    "datasets/GSE77259_Schulten_H_KO.Rda",
+                    "datasets/GSE74385_Schmidt_M_KO.Rda",
+                    "datasets/GSE54934_Torres-Martin_M_KO.Rda",
+                    "datasets/GSE55609_Yeh_T_KO.Rda",
+                    "datasets/GSE16156_DUrso_O_KO.Rda",
+                    "datasets/GSE16581_Lee_Y_KO.Rda",
+                    "datasets/GSE12530_Keller_A_KO.Rda",
+                    "datasets/GSE9438_Claus_E_KO.Rda",
+                    "datasets/GSE4780_Scheck_A_KO.Rda"
+                   )
+
+#### load datasets
+invisible(lapply(datasets_load, 
+       load, 
+       .GlobalEnv)
+)
 ```
 
 ```{r}
 ## load and format table one
-library(dplyr)
-library(Hmisc)
+
 
 meningioma_datasets <- bind_rows(
                       Clark_V_2013[["clinical_data"]]   %>% mutate(data_name = "GSE58037") %>% select(-c(1,2)) %>% as.data.frame(),
@@ -191,7 +203,7 @@ tableone_meningioma <- meningioma_datasets %>%
 
 ```{r}
 # create table
-library(table1)
+
 table1(data = tableone_meningioma, 
                 ~ age + sex + grade + recurrence + recurrence_yrs + recurrence_freq + followup_days + survival_yrs + vital_indicator + tissue | data_name,
        rowlabelhead = "Dataset GEO Accession"

@@ -8,6 +8,8 @@ library(plotly)
 library(shinythemes)
 library(DT)
 library(heatmaply)
+library(rclipboard)
+
 
 ## load data
 #### call datasets
@@ -62,4 +64,8 @@ for (p in datasets) {                    # loop to look through datasets for all
               )
     }
 gene <- sort(unique(gene))
+
+
+## formula to find columns which are not continuous variables for multigene ANOVA (and potentially future) purposes
+not_numeric <- function(x){!is.numeric(x)}
 

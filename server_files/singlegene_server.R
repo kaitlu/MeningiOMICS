@@ -236,7 +236,7 @@
       
       if (is.double(datasetInput()[["data"]] %>% pull(grp())) == TRUE) {
         #### continuous variables
-        print("Linear Fit and Strength of Association")
+        print("Strength of Association")
       } else {
         #### categorical variables
         print("Analysis of Variance")
@@ -273,6 +273,9 @@
         
         #### categorical variables
         
+        ### test if more than one level for comparison
+        if (length(unique(datasetInput()[["data"]] %>% pull(grp())) %>% na.omit) > 1) {
+        
         ## leveneTest
         homogen <- leveneTest(variance())
         homogen_pvalue <- data.frame(homogen$'Pr(>F)'[1])
@@ -300,6 +303,16 @@
         ## create table
         rbind(homogen_pvalue, anova_pvalue, welch_pvalue)
         
+        } else {
+          
+        ### for fewer than 2 levels of comparison
+        warning <- data.frame(paste0("The selected dataset, ",input$dataset,", does not have multiple levels of the selected clinical variable, ",input$grouping,", which is required for ANOVA and pairwise analysis of ",input$gene," expression."))
+        names(warning) <- c("Warning")
+        rownames(warning) <- c("**")
+        warning
+        
+        
+        }
       }
     })
     
@@ -330,6 +343,7 @@
       if (is.double(datasetInput()[["data"]] %>% pull(grp())) == TRUE) {
         #### continuous variables
         ## do nothing
+        
       } else {
         #### categorical variables
         print("Tukey HSD (Pairwise)")
@@ -349,13 +363,31 @@
         
         #### categorical variables
         
-        tukey <- TukeyHSD(variance())
-        as.data.frame(tukey[[input$grouping]])[, c(1,4)]
+        ### test if more than one level for comparison
+        if (length(unique(datasetInput()[["data"]] %>% pull(grp())) %>% na.omit) == 2) {
         
+          tukey_warning <- data.frame(paste0("The selected dataset, ",input$dataset,", does not have enough levels of the selected clinical variable, ",input$grouping,", to report pairwise differnce analysis of ",input$gene," expression."))
+          names(tukey_warning) <- c("Warning")
+          rownames(tukey_warning) <- c("**")
+          tukey_warning
+          
+          
+        } else {
+          
+          ## don't display another warning if the ANOVA warning is present
+          if (length(unique(datasetInput()[["data"]] %>% pull(grp())) %>% na.omit) == 1) {} ## do nothing
+        
+        else { 
+          
+          ## return tukey results if more than 2 levels
+          tukey <- TukeyHSD(variance())
+          as.data.frame(tukey[[input$grouping]])[, c(1,4)]
+        }
+        }
       }
     })
     
-    ## output tuey results
+    ## output tukey results
     output$tukey <- renderTable({
         validate(
             need(input$gene != '', message = FALSE),

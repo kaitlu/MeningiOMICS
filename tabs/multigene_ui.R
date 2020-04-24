@@ -11,9 +11,9 @@ tabPanel(title = "Multigene Analysis",
                                   
                                   ## feild for users to paste in selections 
                                   textInput(inputId = "gene_user_input",
-                                            label = "Genes",
+                                            label = "Genes of interest",
                                             value = NULL,
-                                            placeholder = 'Please paste a comma seperated list of genes of interest'
+                                            placeholder = 'Comma, tab, bar, or semicolon seperated list of genes of interest'
                                   )
                                   
                                   
@@ -87,7 +87,7 @@ tabPanel(title = "Multigene Analysis",
         ## tabs to display
         tabsetPanel(type = "tabs",
                     
-                    tabPanel("Multigene Anova",            ## create tab for multiple anovas table out put
+                    tabPanel("Multigene ANOVA",            ## create tab for multiple anovas table out put
                              value = 1,                               ## multi anova tab value = 3
                              h3(textOutput("multianova_results_title")),
                              dataTableOutput("multianova_results"),   ## output results of multiple
@@ -104,10 +104,13 @@ tabPanel(title = "Multigene Analysis",
                                  
                                  ## create space for summary table
                                  column(12,
-                                        h3(textOutput("signficant_list_title")),
+                                        h3("Significantly Differentially Expressed Genes"),
                                         "Copy Genes Below For Use in the Heatmap Tab",
-                                        code(textOutput("significant_list"))
+                                        pre(textOutput("significant_list")),
                                         
+                                        ## button to copy to clipboard
+                                        rclipboardSetup(),
+                                        uiOutput("clipboard")
                                  )
                              )
                     ),

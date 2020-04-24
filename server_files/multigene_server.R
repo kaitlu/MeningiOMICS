@@ -1,9 +1,17 @@
+      # make a reactive for the gene user input
+      multigene_anova_genes <- reactive({
+         gene_list <- toupper(input$gene_user_input)
+         gene_list2 <- str_replace_all(gene_list,  pattern = " ", "")
+         str_replace_all(gene_list2, pattern = "[|;\t]", ",")
+         })
+
+
       ## find the available datasets for all selected genes 
       datasets_with_all_genes <- reactive({
          req(input$gene_user_input)
          available_datasets_multi <- character()
          for (i in datasets) {
-            if(all(c(strsplit(input$gene_user_input, split =",")[[1]]) %in% colnames(eval(as.symbol(i))[["data"]])
+            if(all(c(strsplit(multigene_anova_genes(), split =",")[[1]]) %in% colnames(eval(as.symbol(i))[["data"]])
             )
             ) {
                available_datasets_multi <- c(available_datasets_multi,
@@ -24,9 +32,7 @@
          for (i in  datasets_with_all_genes()) {
             clinical_variables <- sort(unique(
                c(clinical_variables,
-                 colnames(eval(
-                    as.symbol(i))[["clinical_data"]]
-                 )
+                 names(dplyr::select_if(eval(as.symbol(i))[["clinical_data"]], not_numeric))
                )
             )
             )
@@ -51,7 +57,8 @@
          req(input$multi_grouping)
          genes_clinical_datasets <- character()
          for (i in datasets_with_all_genes()) {
-            if(all(c(c(strsplit(input$gene_user_input,split =",")[[1]]),input$multi_grouping) %in% colnames(eval(as.symbol(i))[["data"]]
+            if(all(c(c(strsplit(multigene_anova_genes(), split =",")[[1]]),
+                     input$multi_grouping) %in% colnames(eval(as.symbol(i))[["data"]]
             ))
             ) {
                genes_clinical_datasets <- c(genes_clinical_datasets,
@@ -92,11 +99,11 @@
        gui <- reactive({
           req(input$gene_user_input)
           lapply(                # input comes as a string
-         as.list(                            # need to feed multi_anova a list
-            strsplit(input$gene_user_input,  # parse user input
-                     split =","              # by comma
-            )[[1]]),                         # index into list         
-         as.symbol)                          # need the gene name unquoted
+         as.list(                             # need to feed multi_anova a list
+            strsplit(multigene_anova_genes(), # parse user input
+                     split =","               # by comma
+            )[[1]]),                          # index into list         
+         as.symbol)                           # need the gene name unquoted
           })
       
       ## create reactive variable for clinical variable
@@ -135,9 +142,25 @@
          req(input$gene_user_input)
          req(input$multi_grouping)
          req(input$multi_dataset)
-         do.call(rbind,            # lists are fun - do call allows rbind to work 
-                 multianova_out()  # bind the gene and anova results
-         )
+         
+         ### test if more than one level for comparison
+         if (length(unique(dui()[["data"]] %>% pull(cvui())) %>% na.omit) > 1) {
+            
+            multiANOVA <- do.call(rbind,            # lists are fun - do call allows rbind to work 
+                               multianova_out()  # bind the gene and anova results
+            )
+            multiANOVA$pvalue <- format(round(x =multiANOVA$pvalue, digits = 2), nsmall = 2)
+            multiANOVA
+         
+         } else {
+         
+         ### for fewer than 2 levels of comparison
+         warning <- data.frame(paste0("The selected dataset, ",input$multi_dataset,", does not have multiple levels of the selected clinical variable, ",input$multi_grouping,", which is required for ANOVA analysis of gene expression."))
+         names(warning) <- c("Warning")
+         rownames(warning) <- c("**")
+         warning
+         
+         }
       })
       
       # title for multigene anova
@@ -175,7 +198,7 @@
          req(input$multi_grouping)
          req(input$multi_dataset)
          
-         dui()[["data"]] %>% select(as.character(strsplit(input$gene_user_input, split =",")[[1]]),
+         dui()[["data"]] %>% select(as.character(strsplit(multigene_anova_genes(), split =",")[[1]]),
                                     input$multi_grouping)
       })
       
@@ -190,26 +213,40 @@
       
       
       # copy and pastable text of genes significant at the selected alpha level
-      filtered_results <- reactive({
-         req(input$gene_user_input)
-         req(input$multi_grouping)
-         req(input$multi_dataset)
-         multianova_table()  %>% filter(pvalue<sig())
-         }) 
-      
       significant_genes <- reactive({
          req(input$gene_user_input)
          req(input$multi_grouping)
          req(input$multi_dataset)
-         as.character(filtered_results()$gene_name)})
+         
+         ## check for mutliple levels of clinical variable
+         if (length(unique(dui()[["data"]] %>% pull(cvui())) %>% na.omit) > 1) {
+         
+         filtered_results <- multianova_table()  %>% dplyr::filter(pvalue<sig())
+         as.character(filtered_results$gene_name)
+         } else {}
+         }) 
       
-      output$signficant_list_title <- renderText({
+      
+      output$significant_list <- renderPrint({
          validate(
             need(input$gene_user_input != '', message = FALSE),
             need(input$multi_grouping != '', message = FALSE),
             need(input$multi_dataset != '', message = FALSE)
          )
-         paste0("Significantly Differentially Expressed Genes")
+         cat(paste(paste(significant_genes()), collapse=","))
+      })
+      
+      output$clipboard <- renderUI({
+         validate(
+            need(input$gene_user_input != '', message = FALSE),
+            need(input$multi_grouping != '', message = FALSE),
+            need(input$multi_dataset != '', message = FALSE)
+         )
+         rclipButton("copybtm",
+                     "Copy to Clipboard",
+                     paste(paste(significant_genes()), collapse=","),
+                     icon("clipboard")
+         )
       })
       
       output$significant_list <- renderPrint({
@@ -222,10 +259,18 @@
       })
       
       
+      # make a reactive for the gene user input
+      multigene_heatmap_genes <- reactive({
+         h_gene_list <- toupper(input$significant_gene_user_input)
+         h_gene_list2 <- str_replace_all(h_gene_list,  pattern = " ", "")
+         str_replace_all(h_gene_list2, pattern = "[|;\t]", ",")
+      })
+      
+      
       #### heatmap
       heatmap <- reactive({ 
          
-         heatmaply(x = dui()[["data"]] %>% select(as.character(strsplit(input$significant_gene_user_input, split =",")[[1]])),
+         heatmaply(x = dui()[["data"]] %>% select(as.character(strsplit(multigene_heatmap_genes(), split =",")[[1]])),
                                       RowSideColors = dui()[["data"]] %>% select(input$multi_grouping),
                                       xlab = "Gene",
                                       main = "Gene Expression Heatmap",
@@ -256,7 +301,7 @@
          req(input$multi_grouping)
          req(input$multi_dataset)
          
-         dui()[["data"]] %>% select(as.character(strsplit(input$significant_gene_user_input, split =",")[[1]]),
+         dui()[["data"]] %>% select(as.character(strsplit(multigene_heatmap_genes(), split =",")[[1]]),
                                                  input$multi_grouping)
       })
       

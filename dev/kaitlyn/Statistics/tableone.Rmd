@@ -13,6 +13,13 @@ body {
     left: 0px;}
 </style>
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
+
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 library(dplyr)
 library(Hmisc)
@@ -25,17 +32,24 @@ library(kableExtra)
 
 
 ```{r include=FALSE}
-load("~/Documents/Thesis/mgm_eda/datasets/GSE85135_Clark_V_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE58037_Clark_V_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE77259_Schulten_H_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE74385_Schmidt_M_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE54934_Torres-Martin_M_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE55609_Yeh_T_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE16156_DUrso_O_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE16581_Lee_Y_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE12530_Keller_A_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE9438_Claus_E_KO.Rda")
-load("~/Documents/Thesis/mgm_eda/datasets/GSE4780_Scheck_A_KO.Rda")
+#### call datasets
+datasets_load <- c( "datasets/GSE85135_Clark_V_KO.Rda", # find all files in this directory to load rather than hard 
+                    "datasets/GSE58037_Clark_V_KO.Rda", # coding in the future
+                    "datasets/GSE77259_Schulten_H_KO.Rda",
+                    "datasets/GSE74385_Schmidt_M_KO.Rda",
+                    "datasets/GSE54934_Torres-Martin_M_KO.Rda",
+                    "datasets/GSE55609_Yeh_T_KO.Rda",
+                    "datasets/GSE16156_DUrso_O_KO.Rda",
+                    "datasets/GSE16581_Lee_Y_KO.Rda",
+                    "datasets/GSE12530_Keller_A_KO.Rda",
+                    "datasets/GSE9438_Claus_E_KO.Rda",
+                    "datasets/GSE4780_Scheck_A_KO.Rda"
+                   )
+
+#### load datasets
+lapply(datasets_load, 
+       load, 
+       .GlobalEnv)
 
 ```
 
@@ -110,7 +124,12 @@ tableone_meningioma <- meningioma_datasets %>%
 ```
 
 ```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, paged.print=TRUE}
-tableone <- CreateTableOne(vars = c("age", "sex", "grade", "recurrence", "recurrence_yrs", "recurrence_freq", "followup_days", "survival_yrs", "vital_status", "tissue", "progression"),
+a <- names(tableone_meningioma)
+
+c <- "data_name"
+ b <- a[!(a %in% c)]
+
+tableone <- CreateTableOne(vars = b,
                                 data = tableone_meningioma,
                                 strata = "data_name",
                                 includeNA = T,
@@ -118,14 +137,24 @@ tableone <- CreateTableOne(vars = c("age", "sex", "grade", "recurrence", "recurr
                                 smd = F)
 
 kableone(tableone)
+
 ```
 
-```{r echo=FALSE}
+```{r eval=FALSE, include=FALSE}
 
 
 
 table1(data = tableone_meningioma, 
        ~ age + sex + grade + recurrence + recurrence_yrs + recurrence_freq + followup_days + survival_yrs + vital_indicator + tissue | data_name,
+       rowlabelhead = "Dataset GEO Accession"
+       )
+
+```
+
+```{r echo=FALSE}
+
+table1(data = tableone_meningioma, 
+       ~ age + sex + grade + recurrence + recurrence_yrs + recurrence_freq + followup_days + survival_yrs + vital_indicator + tissue + histology + radiation + rna_integrity + location + progression + type + mib1_index | data_name,
        rowlabelhead = "Dataset GEO Accession"
        )
 

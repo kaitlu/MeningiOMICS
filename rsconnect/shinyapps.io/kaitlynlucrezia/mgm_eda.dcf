@@ -1,0 +1,13 @@
+name: mgm_eda
+title: mgm_eda
+username:
+account: kaitlynlucrezia
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2035139
+bundleId: 3045921
+url: https://kaitlynlucrezia.shinyapps.io/mgm_eda/
+when: 1587496754.6751
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: www/about_ui.Rmd|www/home_ui.Rmd|datasets_scripts|dev
