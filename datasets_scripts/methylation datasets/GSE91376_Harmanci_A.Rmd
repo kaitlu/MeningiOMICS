@@ -1,0 +1,156 @@
+---
+title: "GSE91376"
+author: "Kaitlyn O'Shea"
+output: html_document
+---
+
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE)
+```
+
+```{r install_packages, eval = FALSE}
+## require BioManager
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("GEOquery") 
+```
+
+```{r libraries, message=FALSE, warning=FALSE}
+## libraries needed
+library("tidyverse")
+library("GEOquery")
+library("here")
+```
+
+## Get GSE91376 from GEO - GPL13534	is the methylation set, other is empty
+```{r Geo_download, message=FALSE, warning=FALSE}
+## Download dataset from GEO, save downloaded files in the same folder as this .Rmd file.
+dir.create(file.path("raw","gse91376"), recursive = TRUE)
+gse91376 <- getGEO("gse91376",  # sample accession 
+                   destdir = file.path("raw","gse91376"),
+                   GSEMatrix = TRUE,
+                   AnnotGPL = TRUE)
+```
+
+## Clinical Data from Dataset
+```{r ClinicalDataExtract}
+## index into data list and extract clinical data
+gse91376_cd <- gse91376[["GSE91376-GPL13534_series_matrix.txt.gz"]] %>%   # index into list 
+                  phenoData() %>%                                   # select phenoData
+                  pData() %>%                                       # apply pData
+                  as_tibble() %>%                                   # tidy friendly
+                  select("geo_accession" = geo_accession,
+                         "sample_id" = `tissue id:ch1`,
+                         "grade" = `grade:ch1`,
+                         mutant_type = `mutation subtype:ch1`,
+                         tissue = `tissue type:ch1`
+                         ) 
+
+gse91376_pheno <- gse91376_cd %>%         # rename and adjust variables
+                      mutate(grade = factor(grade,
+                                            levels = c("1", "2", "3"), 
+                                            labels = c("I", "II", "III")
+                                            ),
+                             
+                    ) %>%
+                      mutate_if(is.character, as.factor)
+```
+
+## Methylation Data from Dataset
+```{r ExpressionDataExtract}
+## index into data list and extract methylation table.
+gse91376_exprs <- 
+                  gse91376[["GSE91376-GPL13534_series_matrix.txt.gz"]] %>%   # index into list 
+                  exprs() %>%         # select expression data
+                  as_tibble()         # tidy friendly
+
+## index into data list and extract feature data
+gse91376_feature <- 
+                  gse91376[["GSE91376-GPL13534_series_matrix.txt.gz"]] %>%  # index into list 
+                  fData() %>%        # select feature data
+                  as_tibble()        # tidy friendly
+
+```
+
+## Transform Methylation Data
+``` {r ExpressionDataTransform}
+# function to find standard deviation of each probe across all tumors
+rowsd <- function(x) {
+                      sqrt(
+                        rowSums((x - rowMeans(x))^2)/
+                          (dim(x)[2] - 1)
+                        )
+}
+
+gse91376_meth <- bind_cols(gse91376_feature["UCSC_RefGene_Name"], gse91376_exprs) %>% # add gene name to data
+               rename("gene" = "UCSC_RefGene_Name") %>%                       # rename name variable as 'gene' 
+               filter(gene != "") %>%                                         # keep only data for named genes
+               mutate(sd = rowsd(.[,-1])) %>%                                 # calculate sd for each probe, index out gene name
+               group_by(gene) %>%                                             # group probes by gene
+               filter(sd == max(sd)) %>%                                      # keep the probe with the max variation for each gene
+               ungroup() %>%                                                  # ungroup by genes 
+               select(-sd) %>%                                                # select all but sd column
+               pivot_longer(-gene,                                            # do not group by gene 
+                            names_to = "geo_accession",                       
+                            values_to = "value") %>%                          
+               mutate("mvalue" = log2(value/(1 - value))) %>%                 # log2 transform B / (1-B) expression for variance stabilization 
+               group_by(gene) %>%                                             # standardize for cross data set comparison
+               mutate("standardized" = (mvalue - mean(mvalue))/               # center at mean for gene 
+                                         sd(mvalue),                          # scale by sd for gene
+                       ) %>%
+                ungroup() %>%                                                 # ungroup by genes 
+                select(-value, -mvalue) %>%                                           # select all but sd column
+                pivot_wider(names_from = "gene",                              # final format genes as rows
+                            values_from = "standardized")                     # final format expression across accession as columns    
+```
+
+## Dataset for Analysis
+```{r FinalDataset}
+## combine phenotype and expression data for workable data
+gse91376_data <- inner_join(gse91376_pheno, gse91376_meth, 
+                            by = "geo_accession")   # match by accession
+
+## create metatag for dataset
+gse91376_info <-  
+                list(
+                     name = "Harmanci_a",               # author
+                     accession = "GSE91376",         # dataset accession 
+                     # the following are logical to determine clinical data available for dataset
+                     geo_accession = "geo_accession" %in% colnames(gse91376_pheno),
+                      sample_id = "sample_id" %in% colnames(gse91376_pheno),
+                      age = "age" %in% colnames(gse91376_pheno),
+                      sex = "sex" %in% colnames(gse91376_pheno),
+                      grade = "grade" %in% colnames(gse91376_pheno),
+                      histology = "histology" %in% colnames(gse91376_pheno),
+                      type = "type" %in% colnames(gse91376_pheno),
+                      location = "location" %in% colnames(gse91376_pheno),
+                      mib1_index = "mib1_index" %in% colnames(gse91376_pheno),
+                      recurrence = "recurrence" %in% colnames(gse91376_pheno),
+                      recurrence_yrs = "recurrence_yrs" %in% colnames(gse91376_pheno),
+                      recurrence_freq = "recurrence_freq" %in% colnames(gse91376_pheno),
+                      followup_days = "followup_days" %in% colnames(gse91376_pheno),
+                      survival_yrs = "survival_yrs" %in% colnames(gse91376_pheno),
+                      vital_indicator = "vital_indicator" %in% colnames(gse91376_pheno),
+                      tissue = "tissue" %in% colnames(gse91376_pheno),
+                      progression = "progression" %in% colnames(gse91376_pheno),
+                      radiation = "radiation" %in% colnames(gse91376_pheno),
+                      rna_integrity ="rna_integrity" %in% colnames(gse91376_pheno),
+
+                     sample_numbers = nrow(gse91376_data) # number of samples 
+                     )
+
+## create dataset as list 
+Harmanci_a_2013 <- list(
+                dataset_info = gse91376_info,             # metatag
+                clinical_data = gse91376_pheno,           # clinical data
+                expression_data = gse91376_meth,           # expression data
+                data = gse91376_data #,                     # combined, workable data
+             #   full_GEO = gse91376                       # full original download from GEO
+)
+```
+
+```{r}
+save(Harmanci_a_2013, file = here("datasets/methylation","GSE91376_Harmanci_A.Rda")) 
+```

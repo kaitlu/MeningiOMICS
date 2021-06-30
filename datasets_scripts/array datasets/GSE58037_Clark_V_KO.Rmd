@@ -167,5 +167,5 @@ Clark_V_2013 <- list(
 )
 ```
 ```{r}
-save(Clark_V_2013, file = here("datasets","GSE58037_Clark_V_KO.Rda")) 
+save(Clark_V_2013, file = here("datasets/array","GSE58037_Clark_V_KO.Rda")) 
 ```

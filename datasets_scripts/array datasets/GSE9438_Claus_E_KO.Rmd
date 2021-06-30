@@ -45,11 +45,15 @@ gse9438_cd <-
                   as_tibble() %>%             # tidy friendly
                   select("geo_accession" = geo_accession,
                          "sample_id" = title,
+                         "ER_status"= `ER:ch1`,
+                         "PR_status" = `PR:ch1`
                          ) 
 
-gse9438_pheno <- gse9438_cd %>% mutate(
-                        "tissue" = "meningioma"
-)
+gse9438_pheno <- gse9438_cd %>% 
+    mutate("tissue" = "meningioma",
+           ER_status = factor(ER_status, levels=c(0,1), labels = c("ER-", "ER+")),
+           PR_status = factor(PR_status, levels=c(0,1), labels = c("PR-", "PR+"))
+           )
 ```
 
 ## Expression Data from Dataset
@@ -149,5 +153,5 @@ Claus_E <- list(
 ```
 
 ```{r}
-save(Claus_E, file = here("datasets","GSE9438_Claus_E_KO.Rda")) 
+save(Claus_E, file = here("datasets/array","GSE9438_Claus_E_KO.Rda")) 
 ```

@@ -170,6 +170,6 @@ Scheck_A <- list(
 ```
 
 ```{r}
-save(Scheck_A, file = here("datasets","GSE4780_Scheck_A_KO.Rda"))
+save(Scheck_A, file = here("datasets/array","GSE4780_Scheck_A_KO.Rda"))
 ```
 

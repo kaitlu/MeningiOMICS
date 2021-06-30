@@ -49,6 +49,6 @@ Explore select publicly available meningioma datasets! Select a tab above to beg
         
 ## Questions?
         
-Contact the authors of the application via email.
+Bugs or Feature Requests can be submitted to the [MeningiOMICS Issues page](https://github.com/kaitlu/MeningiOMICS/issues).
 
 *****

@@ -55,22 +55,19 @@ gse54934_pheno <- gse54934_cd %>%         # rename and adjust variables
                                              ),
                             "tissue" = ifelse(grepl("Meningioma", sample_id),
                                                "meningioma",
-                                               histology)    
-                    ) %>% mutate(
-                                "grade" = factor(grade, 
-                                                levels = c("I", "2", "3"), 
-                                                labels = c("I", "II", "III")
-                                                )
-                                ) %>% mutate_if(is.character, as.factor) %>%
-                                                                            select(
-                                                                                   geo_accession,
-                                                                                   sample_id,
-                                                                                   grade,
-                                                                                   tissue
-                                                                                   ) %>%
-                                                                                        filter(
-                                                                                            tissue == "meningioma"
-                                                                                        )
+                                               histology)   
+                            ) %>%
+    filter(tissue == "meningioma") %>% 
+    mutate("grade" = factor(grade,
+                            levels = c("I", "2", "3"), 
+                            labels = c("I", "II", "III")
+                            )
+           ) %>% mutate_if(is.character, as.factor) %>%
+    select(geo_accession,
+           sample_id,
+           grade,
+           tissue
+           )
     
 ```
 
@@ -168,5 +165,5 @@ TorresMartin_M <- list(
                        )
 ```
 ```{r}
-save(TorresMartin_M, file = here("datasets","GSE54934_Torres-Martin_M_KO.Rda") )
+save(TorresMartin_M, file = here("datasets/array","GSE54934_Torres-Martin_M_KO.Rda") )
 ```

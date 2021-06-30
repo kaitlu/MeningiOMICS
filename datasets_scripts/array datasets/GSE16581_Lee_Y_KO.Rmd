@@ -171,5 +171,5 @@ Lee_Y <- list(
 ```
 
 ```{r}
-save(Lee_Y, file = here("datasets","GSE16581_Lee_Y_KO.Rda"))
+save(Lee_Y, file = here("datasets/array","GSE16581_Lee_Y_KO.Rda"))
 ```

@@ -1,53 +1,87 @@
-      # make a reactive for the gene user input
-      multigene_anova_genes <- reactive({
-         gene_list <- toupper(input$gene_user_input)
-         gene_list2 <- str_replace_all(gene_list,  pattern = " ", "")
-         str_replace_all(gene_list2, pattern = "[|;\t]", ",")
-         })
+## this file contains all server functions for the multi gene analysis tab
+
+    ## server side load of all omics type options for input
+    updateSelectizeInput(session = session,
+                         inputId = "omics_multi",
+                         choices = omics,
+                         selected = FALSE,
+                         server = TRUE)
+
+    ## datasets load
+    multi_datasets <- reactive({
+        req(input$omics_multi)
+        ifelse(input$omics_multi == "Microarray",
+               return(array_datasets),
+               ifelse(input$omics_multi == "Methylation",
+                      return(methyl_datasets),
+                             ""))                          ## add another ifelse() if new datatypes becomes avail, here and below
+    })
+    
+    ## data type for title
+    multi_data_type <- reactive({
+        req(input$omics_multi)
+        ifelse(input$omics_multi == "Microarray",
+               "RNA (Microarray) Expression",
+               ifelse(input$omics_multi == "Methylation",
+                      "Methylation",
+                      ""))
+    })
+    
+    ## expression units for axis
+    multi_unit_type <- reactive({
+        req(input$omics_multi)
+        ifelse(input$omics_multi == "Microarray",
+               "Expression (log2)",
+               ifelse(input$omics_multi == "Methylation",
+                      "M-value",
+                      ""))
+    })
+    
+    ## make a reactive for the gene user input
+    multigene_anova_genes <- reactive({
+        gene_list <- toupper(input$gene_user_input)
+        gene_list2 <- str_replace_all(gene_list,  pattern = " ", "")
+        str_replace_all(gene_list2, pattern = "[|;\t]", ",")
+        })
 
 
-      ## find the available datasets for all selected genes 
-      datasets_with_all_genes <- reactive({
-         req(input$gene_user_input)
-         available_datasets_multi <- character()
-         for (i in datasets) {
+    ## find the available datasets for all selected genes 
+    datasets_with_all_genes <- reactive({
+        req(input$omics_multi)
+        req(input$gene_user_input)
+        available_datasets_multi <- character()
+        for (i in multi_datasets()) {
             if(all(c(strsplit(multigene_anova_genes(), split =",")[[1]]) %in% colnames(eval(as.symbol(i))[["data"]])
-            )
-            ) {
-               available_datasets_multi <- c(available_datasets_multi,
-                                             i
-               )
-               
-               
-            }
-         }
-         return(available_datasets_multi)
-      })
+                   )
+               ) {
+                available_datasets_multi <- c(available_datasets_multi,
+                                             i)
+            }}
+        return(available_datasets_multi)
+        })
       
       
-      # find available clinical variables in available datasets
-      multi_cv <- reactive({
-         req(input$gene_user_input)
-         clinical_variables <- character()
-         for (i in  datasets_with_all_genes()) {
-            clinical_variables <- sort(unique(
-               c(clinical_variables,
-                 names(dplyr::select_if(eval(as.symbol(i))[["clinical_data"]], not_numeric))
+    ## find available clinical variables in available datasets
+    multi_cv <- reactive({
+        req(input$gene_user_input)
+        clinical_variables <- character()
+        for (i in  datasets_with_all_genes()) {
+            clinical_variables <- 
+                c(clinical_variables,
+                  names(dplyr::select_if(eval(as.symbol(i))[["clinical_data"]], 
+                                         not_numeric))
                )
-            )
-            )
-            
          }
-         return(clinical_variables)
+        return(sort(unique(clinical_variables[!clinical_variables %in% c("geo_accession", "sample_id")])))  # omit the gse id from options
       }) 
       
-      ## populate the available clinical variables for selected gene in UI
-      observe({
-         req(input$gene_user_input)
-         updateSelectizeInput(session = session,
-                              inputId = "multi_grouping",
-                              label = NULL,
-                              choices = multi_cv()
+    ## populate the available clinical variables for selected gene in UI
+    observe({
+        req(input$gene_user_input)
+        updateSelectizeInput(session = session,
+                             inputId = "multi_grouping",
+                             label = NULL,
+                             choices = multi_cv()
          )
       })
       
@@ -89,7 +123,7 @@
                                                         clinical_variable)) # over clinical variables
                         ))
          anova_pvalue <- data.frame(gene_name = as.character(gene),         # gene name
-                                    `pvalue` = aov[[1]]$'Pr(>F)'[1]          # extracted p-value
+                                    `pvalue` = aov[[1]]$'Pr(>F)'[1]         # extracted p-value
          ) 
          anova_pvalue
       }
@@ -98,7 +132,7 @@
      
        gui <- reactive({
           req(input$gene_user_input)
-          lapply(                # input comes as a string
+          lapply(                             # input comes as a string
          as.list(                             # need to feed multi_anova a list
             strsplit(multigene_anova_genes(), # parse user input
                      split =","               # by comma
@@ -155,7 +189,7 @@
          } else {
          
          ### for fewer than 2 levels of comparison
-         warning <- data.frame(paste0("The selected dataset, ",input$multi_dataset,", does not have multiple levels of the selected clinical variable, ",input$multi_grouping,", which is required for ANOVA analysis of gene expression."))
+         warning <- data.frame(paste0("The selected dataset, ",input$multi_dataset,", does not have multiple levels of the selected clinical variable, ",input$multi_grouping,", which is required for ANOVA."))
          names(warning) <- c("Warning")
          rownames(warning) <- c("**")
          warning
@@ -165,9 +199,10 @@
       
       # title for multigene anova
       output$multianova_results_title <- renderText({validate(
-         need(input$gene_user_input != '', message = FALSE),
-         need(input$multi_grouping != '', message = FALSE),
-         need(input$multi_dataset != '', message = FALSE)
+          need(input$omics_multi != '',  message = F),
+          need(input$gene_user_input != '', message = F),
+          need(input$multi_grouping != '', message = F),
+          need(input$multi_dataset != '', message = F)
       )
          paste0("Results of ANOVA")
       })
@@ -175,11 +210,12 @@
       # datatable output of all multianova results
       output$multianova_results <- renderDataTable({
          validate(
-            need(input$gene_user_input != '', message = "Please enter comma seperated genes of interest"),
-            need(input$multi_grouping != '', message = "Please choose a clinical variable."),
-            need(input$multi_dataset != '', message = "Please choose a dataset")
+           need(input$omics_multi != '',  message = "Please select an omics data type"),
+           need(input$gene_user_input != '', message = "Please enter comma seperated genes of interest"),
+           need(input$multi_grouping != '', message = "Please select a clinical variable."),
+           need(input$multi_dataset != '', message = "Please select a dataset")
          )
-         datatable(multianova_table())
+         multianova_table()
       })
       
       # downloadable output of all multianova results
@@ -270,26 +306,29 @@
       #### heatmap
       heatmap <- reactive({ 
          
-         heatmaply(x = dui()[["data"]] %>% select(as.character(strsplit(multigene_heatmap_genes(), split =",")[[1]])),
-                                      RowSideColors = dui()[["data"]] %>% select(input$multi_grouping),
-                                      xlab = "Gene",
-                                      main = "Gene Expression Heatmap",
-                                      key.title = "Expression",
-                                      showticklabels = c(T,F),
-                                      plot_method = "plotly",
-                                      side_color_colorbar_len = .3,
-                                      colorbar_len = .4,
-                                      colorbar_xpos = 1.02,
-                                      colorbar_ypos = 0,
-                                      row_side_palette = Spectral
-                                      )
+         heatmaply(x = dui()[["data"]] %>% 
+                       select(as.character(strsplit(multigene_heatmap_genes(), split =",")[[1]])),
+                   RowSideColors = dui()[["data"]] %>% 
+                       select(input$multi_grouping),
+                   xlab = "Gene",
+                   main = paste(multi_data_type(), "Heatmap"),
+                   key.title = paste(multi_unit_type()),
+                   showticklabels = c(T,F),
+                   plot_method = "plotly",
+                   side_color_colorbar_len = .3,
+                   colorbar_len = .4,
+                   colorbar_xpos = 1.02,
+                   colorbar_ypos = 0,
+                   row_side_palette = Spectral
+                   )
          })
       
       output$heatmap <- renderPlotly({
          validate(
-            need(input$significant_gene_user_input != '',  message = "Please enter comma seperated genes of interest"),
-            need(input$multi_grouping != '', message =   "Please choose a clinical variable."),
-            need(input$multi_dataset != '', message = "Please choose a dataset")
+             need(input$omics_multi != '',  message = "Please select an omics data type"),
+             need(input$significant_gene_user_input != '',  message = "Please enter comma seperated genes of interest"),
+             need(input$multi_grouping != '', message =   "Please select a clinical variable."),
+             need(input$multi_dataset != '', message = "Please select a dataset")
             )
           heatmap()
                                                 

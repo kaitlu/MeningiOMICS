@@ -4,7 +4,17 @@ tabPanel(title = "Single Gene Analysis",
         
         sidebarPanel(
             
-            helpText("Analysis and visualization of RNA expression"),
+            helpText("Analysis and visualization by single gene"),
+            
+            ## select expression type
+            selectizeInput(inputId =  "omics",
+                           label = "Select an Omics Data Type",
+                           choices = NULL,
+                           options = list(
+                               placeholder = 'Please select an option below',
+                               onInitialize = I('function() {this.setValue(""); }')
+                           )
+            ),
             
             ## select gene to group by
             selectizeInput(inputId = "gene",

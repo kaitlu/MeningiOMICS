@@ -166,5 +166,5 @@ Schulten_H <- list(
                 )
 ```
 ```{r}
-save(Schulten_H, file = here("datasets","GSE77259_Schulten_H_KO.Rda") )
+save(Schulten_H, file = here("datasets/array","GSE77259_Schulten_H_KO.Rda") )
 ```

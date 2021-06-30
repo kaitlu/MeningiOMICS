@@ -3,24 +3,28 @@ output:
   html_document:
     toc: true
     toc_depth: 2
-    toc_float: true
+    toc_float: false
 ---
 
 
 ```{r setup, include=FALSE}
+## library
+library(knitr)
+library(DT)
+library(htmlTable)
+library(gtsummary)
+library(flextable)
+library(dplyr)
+
 knitr::opts_chunk$set(echo = FALSE)
 knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+
+
 ```
 
-``` {r}
-## library
-library(htmlTable)
-library(table1)
-library(dplyr)
-library(Hmisc)
-```
+
 
 
 
@@ -48,59 +52,70 @@ Great care was taken to preserve the integrity of each dataset included in Menin
 The table below contains links to the GEO Accession page for each dataset.
 
 ```{r}
-## names of datasets
-dataset <- c("Clark_V_2013", 
-              "Clark_V_2016",
-              "Schulten_H",
-              "Schmidt_M",
-              "TorresMartin_M",
-              "Yeh_T",
-              "DUrso_O",
-              "Lee_Y",
-              "Keller_A",
-              "Claus_E",
-              "Scheck_A"
-)
+## make a clicakable link
+clickable <- function(link, text) {
+    paste0("<a href='", link, "' target='_blank'>", text, "</a>")
+}
+```
+
+
+```{r}
+## array datasets
+geo_link_array <- rbind(
+      c("Clark_V_2013",    "GSE58037", "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE58037"),
+      c("Clark_V_2016",    "GSE85135", "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE85135"),
+      c("Schulten_H",      "GSE77259", "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE77259"),
+      c( "Schmidt_M",      "GSE74385", "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74385"),
+      c( "TorresMartin_M", "GSE54934", "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE54934"),
+      c( "Yeh_T",          "GSE55609", "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE55609"),
+      c( "DUrso_O",        "GSE16156", "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE16156"),
+      c( "Lee_Y",          "GSE16581", "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE16581"),
+      c( "Keller_A",       "GSE12530", "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE12530"),
+      c( "Claus_E",        "GSE9438",  "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE9438"),
+      c( "Scheck_A",       "GSE4780",  "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE4780")
+      ) %>% 
+    data.frame() %>% 
+    setNames(c("dataset", "geo_accession", "geo_link"))  %>% 
+    mutate(`Link to GEOAccession Viewer` = clickable(link = geo_link, text = geo_accession),
+           datatype = "Microarray") 
+```
+
+
+```{r}
+## methylation datasets
+geo_link_methyl <- rbind(
+    c("Harmanci_a_2013",  "GSE91376", "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE91376"),
+    c("Agnihotri_S_2013", "GSE83933", "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE83933")
+    ) %>% 
+    data.frame() %>% 
+    setNames(c("dataset", "geo_accession", "geo_link")) %>% 
+    mutate(`Link to GEOAccession Viewer` = clickable(link = geo_link, text = geo_accession),
+           datatype = "Methylation") 
+
+
 ```
 
 ```{r}
-## corresponding geoaccession
-geo_accession <- c("GSE58037",
-                   "GSE85135",
-                   "GSE77259",
-                   "GSE74385",
-                   "GSE54934",
-                   "GSE55609",
-                   "GSE16156",
-                   "GSE16581",
-                   "GSE12530",
-                   "GSE9438",
-                   "GSE4780")
+## combine all datatypes
+master_set <- bind_rows(geo_link_array,
+                        geo_link_methyl)
 ```
 
 ```{r}
-## links to data
-geo_link <- c("https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE58037",
-               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE85135",
-               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE77259",
-               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74385",
-               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE54934",
-               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE55609",
-               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE16156",
-               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE16581",
-               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE12530",
-               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE9438",
-               "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE4780"
-               )
-```
+## manipulate for presentation    
+references <- master_set %>% 
+    select(datatype, dataset, `Link to GEOAccession Viewer`) %>%     
+    mutate(datatype = factor(datatype))  ## factor any cols for selectable buttons in datatable
 
-```{r}
 ## table of links
-references <- data.frame(cbind(dataset, geo_accession, geo_link))
-
-library(knitr)
-kable(references)
+datatable(references, 
+          escape = FALSE,  # allows the html clickables to render
+          filter = "top",  # search boxes at top (allows filtering by datatype)
+          rownames = FALSE, # no row names
+          options = list(columnDefs = list(list(width = '200px', targets = "_all"))) # sets colwidths instead of auto b/c filtering issue
+          ) 
 ```
+
 
 *****
 
@@ -110,107 +125,45 @@ This table describes the data available the datasets included in MeningiOMICS.
 
 ```{r}
 ## load datasets to be summarized
-datasets_load <- c( "datasets/GSE85135_Clark_V_KO.Rda", # find all files in this directory to load rather than hard 
-                    "datasets/GSE58037_Clark_V_KO.Rda", # coding in the future
-                    "datasets/GSE77259_Schulten_H_KO.Rda",
-                    "datasets/GSE74385_Schmidt_M_KO.Rda",
-                    "datasets/GSE54934_Torres-Martin_M_KO.Rda",
-                    "datasets/GSE55609_Yeh_T_KO.Rda",
-                    "datasets/GSE16156_DUrso_O_KO.Rda",
-                    "datasets/GSE16581_Lee_Y_KO.Rda",
-                    "datasets/GSE12530_Keller_A_KO.Rda",
-                    "datasets/GSE9438_Claus_E_KO.Rda",
-                    "datasets/GSE4780_Scheck_A_KO.Rda"
-                   )
+array_datasets_load <- list.files(path = "datasets/array", full.names = TRUE)
 
 #### load datasets
-invisible(lapply(datasets_load, 
+invisible(lapply(array_datasets_load, 
+       load, 
+       .GlobalEnv)
+)
+
+## load datasets to be summarized
+methyl_datasets_load <- list.files(path = "datasets/methylation", full.names = TRUE)
+
+#### load datasets
+invisible(lapply(methyl_datasets_load, 
        load, 
        .GlobalEnv)
 )
 ```
 
-```{r}
-## load and format table one
-
-
-meningioma_datasets <- bind_rows(
-                      Clark_V_2013[["clinical_data"]]   %>% mutate(data_name = "GSE58037") %>% select(-c(1,2)) %>% as.data.frame(),
-                      Clark_V_2016[["clinical_data"]]   %>% mutate(data_name = "GSE85135") %>% select(-c(1,2)) %>% as.data.frame(),
-                      Schulten_H[["clinical_data"]]     %>% mutate(data_name = "GSE77259") %>% select(-c(1,2)) %>% as.data.frame(),
-                      Schmidt_M[["clinical_data"]]      %>% mutate(data_name = "GSE74385") %>% select(-c(1,2)) %>% as.data.frame(),
-                      TorresMartin_M[["clinical_data"]] %>% mutate(data_name = "GSE54934") %>% select(-c(1,2)) %>% as.data.frame(),
-                      Yeh_T[["clinical_data"]]          %>% mutate(data_name = "GSE55609") %>% select(-c(1,2)) %>% as.data.frame(),
-                      DUrso_O[["clinical_data"]]        %>% mutate(data_name = "GSE16156") %>% select(-c(1,2)) %>% as.data.frame(),
-                      Lee_Y[["clinical_data"]]          %>% mutate(data_name = "GSE16581") %>% select(-c(1,2)) %>% as.data.frame(),
-                      Keller_A[["clinical_data"]]       %>% mutate(data_name = "GSE12530") %>% select(-c(1,2)) %>% as.data.frame(),
-                      Claus_E[["clinical_data"]]        %>% mutate(data_name = "GSE9438") %>% select(-c(1,2)) %>% as.data.frame(),
-                      Scheck_A[["clinical_data"]]       %>% mutate(data_name = "GSE4780") %>% select(-c(1,2)) %>% as.data.frame()
-                      )
-
-
-        label(meningioma_datasets$age) <- "Age"
-        label(meningioma_datasets$sex) <- "Sex"
-        label(meningioma_datasets$grade) <- "Grade"
-        label(meningioma_datasets$recurrence) <- "Recurrence"
-        label(meningioma_datasets$recurrence_yrs) <- "Time to Recurrence"
-        label(meningioma_datasets$recurrence_freq) <- "Frequency of Recurrence"
-        label(meningioma_datasets$followup_days) <- "Follow-up Time"
-        label(meningioma_datasets$survival_yrs) <- "Survival Time"
-        label(meningioma_datasets$vital_indicator) <- "Patient Status"
-        label(meningioma_datasets$tissue) <- "Tissue Type"
-        
-        units(meningioma_datasets$recurrence_yrs) <- "years"
-        units(meningioma_datasets$followup_days) <- "days"
-        units(meningioma_datasets$survival_yrs) <- "years"
-        
-tableone_meningioma <- meningioma_datasets %>% 
-  mutate(sex = case_when(sex == "m" ~ "Male", 
-                         sex == "f" ~ "Female",
-                         TRUE ~ as.character(sex)
-                         ),
-         recurrence = case_when(recurrence == "primary" ~ "Primary",
-                                recurrence == "recurrent" ~ "Recurrent",
-                                TRUE ~ as.character(recurrence)
-                                ),
-         vital_indicator = case_when(vital_indicator == 1 ~ "Deceased",
-                                     vital_indicator == 0 ~ "Alive",
-                                     TRUE ~ as.character(vital_indicator)
-                                     ),
-         tissue = case_when(tissue == "meningioma" ~ "Meningioma",
-                             tissue == "meninges" ~ "Meninges",
-                             TRUE ~as.character(tissue)
-                             )
-         )
-
-
-        label(tableone_meningioma$age) <- "Age"
-        label(tableone_meningioma$sex) <- "Sex"
-        label(tableone_meningioma$grade) <- "Grade"
-        label(tableone_meningioma$recurrence) <- "Recurrence"
-        label(tableone_meningioma$recurrence_yrs) <- "Time to Recurrence"
-        label(tableone_meningioma$recurrence_freq) <- "Frequency of Recurrence"
-        label(tableone_meningioma$followup_days) <- "Follow-up Time"
-        label(tableone_meningioma$survival_yrs) <- "Survival Time"
-        label(tableone_meningioma$vital_indicator) <- "Patient Status"
-        label(tableone_meningioma$tissue) <- "Tissue Type"
-        
-        units(tableone_meningioma$recurrence_yrs) <- "years"
-        units(tableone_meningioma$followup_days) <- "days"
-        units(tableone_meningioma$survival_yrs) <- "years"
-        
-```
 
 ```{r}
-# create table
+# write a loop to to create gt_summary tables
+summaries <- list()
+titles <- vector(mode = "character", length = length(master_set$dataset))
+for (i in 1:length(master_set$dataset)) {
+    summaries[[i]] <- 
+        eval(as.symbol(master_set$dataset[i]))$clinical_data %>% 
+        select(!c(geo_accession,sample_id)) %>% 
+        tbl_summary(missing_text = "(Missing)") %>% 
+        modify_header(label = "**Clincal Variable**") %>%
+        modify_footnote(all_stat_cols() ~ "n (%); Median (IQR)") %>% 
+        bold_labels()
+    titles[i] <- paste0(master_set$datatype[i],"\n",master_set$dataset[i],"\n", master_set$geo_accession[i])
+}
 
-table1(data = tableone_meningioma, 
-                ~ age + sex + grade + recurrence + recurrence_yrs + recurrence_freq + followup_days + survival_yrs + vital_indicator + tissue | data_name,
-       rowlabelhead = "Dataset GEO Accession"
-       )
+tbl_merge(summaries, tab_spanner = titles) %>% 
+    modify_spanning_header(list(label ~ "Datatype\nDataset\nGEO Accession")) %>% 
+    as_flex_table() %>% 
+    theme_booktabs() 
+
 
 
 ```
-
-
-*****

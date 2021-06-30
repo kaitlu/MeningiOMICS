@@ -159,5 +159,5 @@ DUrso_O <- list(
                    )
 ```
 ```{r}
-save(DUrso_O, file = here("datasets","GSE16156_DUrso_O_KO.Rda")) 
+save(DUrso_O, file = here("datasets/array","GSE16156_DUrso_O_KO.Rda")) 
 ```

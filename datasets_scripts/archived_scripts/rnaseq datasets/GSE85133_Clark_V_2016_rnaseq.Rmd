@@ -1,0 +1,209 @@
+---
+title: "GSE85133"
+author: "Kaitlyn O'Shea"
+output: html_document
+---
+
+**THIS SCRIPT HAS BEEN ARCHIVED DUE TO THE AVAILABILITY OF TPM DATA FORMAT ONLY, LIMITING THE ABILITY TO LOOK FOR RELATIONSHIPS ACROSS SAMPLES DUE TO WITHIN SAME NORMALIZATION - CAN REVISIT IF COUNT MATRIX BECOMES PUBLICALLY AVAILABLE**
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE)
+```
+
+```{r install_packages, eval = FALSE}
+## require BioManager
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("GEOquery") 
+```
+
+```{r libraries, message=FALSE, warning=FALSE}
+## libraries needed
+library("tidyverse")
+library("GEOquery")
+library("here")
+```
+
+## Get GSE85133 from GEO 
+```{r Geo_download, message=FALSE, warning=FALSE}
+## Download dataset from GEO, save downloaded files in the same folder as this .Rmd file.
+dir.create(file.path("raw","gse85133"), recursive = TRUE)
+gse85133 <- getGEO("gse85133",  # sample accession 
+                   destdir = file.path("raw","gse85133"),
+                   GSEMatrix = TRUE,
+                   AnnotGPL = TRUE)
+```
+
+## Clinical Data from Dataset
+```{r ClinicalDataExtract}
+## index into data list and extract clinical data
+gse85133_cd <- gse85133[["GSE85133_series_matrix.txt.gz"]] %>%   # index into list 
+                  phenoData() %>%                                   # select phenoData
+                  pData() %>%                                       # apply pData
+                  as_tibble() %>%                                   # tidy friendly
+                  select("geo_accession" = geo_accession,
+                         "sample_id" = `title`,
+                         age = `age:ch1`,
+                         sex = `gender:ch1`,
+                         radiation = `radiated:ch1`,
+                         mutant_type = `mutation group:ch1`,
+                         grade = `who grade:ch1`,
+                         histology = `histology:ch1`,
+                         tissue = `tissue:ch1`
+                         ) 
+
+gse85133_pheno <- gse85133_cd %>%         # rename and adjust variables
+                      mutate(grade = factor(grade,
+                                            levels = c("1", "2", "3"),
+                                            labels = c("I", "II", "III")
+                                            ),
+                             sex = tolower(sex),
+                             age = as.numeric(age),
+                             radiation = factor(radiation,
+                                                   levels = c("Y","N", "U"),
+                                                   labels = c("yes", "no", "unknown"))
+
+                    ) %>%
+                      mutate_if(is.character, as.factor)
+```
+
+## rnaseq Data from supplemental GEO files
+```{r}
+### downlod and and read in supplemental files
+
+
+## download fpkm_tracking files from GEO sesies supplement
+getGEOSuppFiles("GSE85133", makeDirectory = TRUE, fetch_files = TRUE, baseDir = here("datasets_scripts/rnaseq datasets/raw"))
+
+## uncompress the download 
+untar(here("datasets_scripts/rnaseq datasets/raw/GSE85133/GSE85133_RAW.tar"), exdir = here("datasets_scripts/rnaseq datasets/raw/GSE85133"))
+
+## unzip all files in _raw directory
+zipped <- list.files(path = here("datasets_scripts/rnaseq datasets/raw/GSE85133"), pattern = "*.gz", full.names = TRUE)
+sapply(X = zipped, FUN = gunzip)
+
+## read in all unziped files
+cuffout <- list.files(path = here("datasets_scripts/rnaseq datasets/raw/GSE85133"), pattern = "*.fpkm_tracking$")
+cuff.files <- paste0(here("datasets_scripts/rnaseq datasets/raw/GSE85133/"), "/", cuffout)
+    
+## pull accession numbers off the files
+geo_accession <- gsub( "_.*$", "", cuffout)
+
+## read in the cuffout files
+for (i in 1:length(cuff.files)) {
+    assign(geo_accession[i], 
+           read.table(cuff.files[i], 
+                      header = TRUE)
+    ) 
+    }
+```
+
+```{r}
+### manipulate supp files (already read in)
+
+## cat these patients together also 
+## filter out unknown gene_ids, select gene_ids and FPKM col from each dataframe (each df is a geo_accession/ patient)
+
+## empty df for loop
+expression.set <- data.frame(geo_accession = character(), gene_id = character(), locus = character(), FPKM= numeric())
+
+## loop through the indiv. geo_access, pull out gene and FPKMs
+for (i in 1:length(geo_accession)) {
+    expression.set <- expression.set %>%
+        bind_rows(., eval(as.symbol(geo_accession[i])) %>%
+                      mutate(geo_accession = geo_accession[i]) %>%
+                      select(geo_accession, gene_id, locus, FPKM) %>%
+                      filter(!str_detect(gene_id, "CUFF.*")) 
+        )
+}
+
+## pivot wider to match MeningiOMICS harmonized expression format
+gse85133_exprs <- expression.set %>%
+    mutate(tpm = exp(log(FPKM) - log(sum(FPKM)) + log(1e6))) %>%
+    select(-FPKM) %>%
+    pivot_wider(names_from = geo_accession, values_from = tpm) %>%
+    select(-locus)
+```
+
+## Transform rnaseq Data
+``` {r ExpressionDataTransform}
+# function to find standard deviation of each probe across all tumors
+rowsd <- function(x) {
+                      sqrt(
+                        rowSums((x - rowMeans(x, na.rm = TRUE))^2, na.rm = TRUE)/
+                          (dim(x)[2] - 1)
+                        )
+}
+
+gse85133_rnaseq <- gse85133_exprs %>% 
+               rename("gene" = "gene_id") %>%                       # rename name variable as 'gene' 
+               filter(gene != "") %>%                                         # keep only data for named genes
+               mutate(sd = rowsd(.[,-1])) %>%                                 # calculate sd for each probe, index out gene name
+               group_by(gene) %>%                                             # group probes by gene
+               filter(sd == max(sd)) %>%                                      # keep the probe with the max variation for each gene
+               filter(row_number() == 1) %>%
+               ungroup() %>%                                                  # ungroup by genes 
+               select(-sd) %>%                                                # select all but sd column
+               pivot_longer(-gene,                                            # do not group by gene 
+                            names_to = "geo_accession",                       
+                            values_to = "tpm") %>%                          
+               mutate(log_tpm = log2(tpm + 0.000001)) %>%                 # log2 transform  for variance stabilization 
+               group_by(gene) %>%                                             # standardize for cross data set comparison
+       #        mutate("standardized" = (log_tpm - mean(log_tpm, na.rm = T))/               # center at mean for gene 
+       #                                  sd(log_tpm, na.rm = T),                          # scale by sd for gene
+       #              ) %>%
+                ungroup() %>%                                                 # ungroup by genes 
+                select(-tpm) %>% #-log_tpm) %>%                                           # select all but sd column
+                pivot_wider(names_from = "gene",                              # final format genes as rows
+                            values_from = log_tpm) #"standardized")                     # final format expression across accession as columns    
+```
+
+## Dataset for Analysis
+```{r FinalDataset}
+## combine phenotype and expression data for workable data
+gse85133_data <- inner_join(gse85133_pheno, gse85133_rnaseq, 
+                            by = "geo_accession")   # match by accession
+
+## create metatag for dataset
+gse85133_info <-  
+                list(
+                     name = "Harmanci_a",               # author
+                     accession = "GSE85133",         # dataset accession 
+                     # the following are logical to determine clinical data available for dataset
+                     geo_accession = "geo_accession" %in% colnames(gse85133_pheno),
+                      sample_id = "sample_id" %in% colnames(gse85133_pheno),
+                      age = "age" %in% colnames(gse85133_pheno),
+                      sex = "sex" %in% colnames(gse85133_pheno),
+                      grade = "grade" %in% colnames(gse85133_pheno),
+                      histology = "histology" %in% colnames(gse85133_pheno),
+                      type = "type" %in% colnames(gse85133_pheno),
+                      location = "location" %in% colnames(gse85133_pheno),
+                      mib1_index = "mib1_index" %in% colnames(gse85133_pheno),
+                      recurrence = "recurrence" %in% colnames(gse85133_pheno),
+                      recurrence_yrs = "recurrence_yrs" %in% colnames(gse85133_pheno),
+                      recurrence_freq = "recurrence_freq" %in% colnames(gse85133_pheno),
+                      followup_days = "followup_days" %in% colnames(gse85133_pheno),
+                      survival_yrs = "survival_yrs" %in% colnames(gse85133_pheno),
+                      vital_indicator = "vital_indicator" %in% colnames(gse85133_pheno),
+                      tissue = "tissue" %in% colnames(gse85133_pheno),
+                      progression = "progression" %in% colnames(gse85133_pheno),
+                      radiation = "radiation" %in% colnames(gse85133_pheno),
+                      rna_integrity ="rna_integrity" %in% colnames(gse85133_pheno),
+
+                     sample_numbers = nrow(gse85133_data) # number of samples 
+                     )
+
+## create dataset as list 
+Clark_V_2016_rnaseq <- list(
+                dataset_info = gse85133_info,             # metatag
+                clinical_data = gse85133_pheno,           # clinical data
+                expression_data = gse85133_rnaseq,           # expression data
+                data = gse85133_data #,                     # combined, workable data
+             #   full_GEO = gse85133                       # full original download from GEO
+)
+```
+
+```{r}
+save(Clark_V_2016_rnaseq, file = here("datasets/rnaseq","Clark_V_2016_rnaseq.Rda")) 
+```

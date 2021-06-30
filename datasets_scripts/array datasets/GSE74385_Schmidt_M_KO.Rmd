@@ -165,5 +165,5 @@ Schmidt_M <- list(
 ```
 
 ```{r}
-save(Schmidt_M, file = here("datasets","GSE74385_Schmidt_M_KO.Rda")) 
+save(Schmidt_M, file = here("datasets/array","GSE74385_Schmidt_M_KO.Rda")) 
 ```

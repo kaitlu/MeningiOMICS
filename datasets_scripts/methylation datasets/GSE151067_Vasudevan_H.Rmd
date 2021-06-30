@@ -1,0 +1,154 @@
+---
+title: "GSE151067"
+author: "Kaitlyn O'Shea"
+output: html_document
+---
+
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE)
+```
+
+```{r install_packages, eval = FALSE}
+## require BioManager
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("GEOquery") 
+```
+
+```{r libraries, message=FALSE, warning=FALSE}
+## libraries needed
+library("tidyverse")
+library("GEOquery")
+library("here")
+```
+
+## Get GSE151067 from GEO
+```{r Geo_download, message=FALSE, warning=FALSE}
+## Download dataset from GEO, save downloaded files in the same folder as this .Rmd file.
+dir.create(file.path("raw","gse151067"), recursive = TRUE)
+gse151067 <- getGEO("gse151067",  # sample accession 
+                   destdir = file.path("raw","gse151067"),
+                   GSEMatrix = TRUE,
+                   AnnotGPL = TRUE)
+```
+
+## Clinical Data from Dataset
+```{r ClinicalDataExtract}
+## index into data list and extract clinical data
+gse151067_cd <- gse151067[["GSE151067_series_matrix.txt.gz"]] %>%   # index into list 
+                  phenoData() %>%                                   # select phenoData
+                  pData() %>%                                       # apply pData
+                  as_tibble() %>%                                   # tidy friendly
+                  select("geo_accession" = geo_accession,
+                         "sample_id" = `individual:ch1`, 
+                         "age" = `age:ch1`,
+                         "sex" = `gender:ch1`,  
+                         "tissue" = `disease state:ch1`
+                         ) 
+
+gse151067_pheno <- gse151067_cd %>%         # rename and adjust variables
+                     mutate(tissue = tolower(tissue),
+                            age = as.numeric(age)
+                    ) %>%
+                      mutate_if(is.character, as.factor)
+```
+
+## Expression Data from Dataset
+```{r ExpressionDataExtract}
+## index into data list and extract methylation table.
+gse151067_exprs <- 
+                  gse151067[["GSE151067_series_matrix.txt.gz"]] %>%   # index into list 
+                  exprs() %>%         # select expression data
+                  as_tibble()         # tidy friendly
+
+## index into data list and extract gene feature data
+gse151067_feature <- 
+                  gse151067[["GSE151067_series_matrix.txt.gz"]] %>%  # index into list 
+                  fData() %>%        # select feature data
+                  as_tibble()        # tidy friendly
+
+## these are empty - can download the supplementary files 
+```
+
+## Transform Methylation Data
+``` {r ExpressionDataTransform}
+# function to find standard deviation of each probe across all tumors
+rowsd <- function(x) {
+                      sqrt(
+                        rowSums((x - rowMeans(x))^2)/
+                          (dim(x)[2] - 1)
+                        )
+}
+
+gse151067_meth <- bind_cols(gse151067_feature["UCSC_RefGene_Name"], gse151067_exprs) %>% # add gene name to data
+               rename("gene" = "UCSC_RefGene_Name") %>%                       # rename name variable as 'gene' 
+               filter(gene != "") %>%                                         # keep only data for named genes
+               mutate(sd = rowsd(.[,-1])) %>%                                 # calculate sd for each probe, index out gene name
+               group_by(gene) %>%                                             # group probes by gene
+               filter(sd == max(sd)) %>%                                      # keep the probe with the max variation for each gene
+               ungroup() %>%                                                  # ungroup by genes 
+               select(-sd) %>%                                                # select all but sd column
+               pivot_longer(-gene,                                            # do not group by gene 
+                            names_to = "geo_accession",                       
+                            values_to = "value") %>%                          
+               mutate("mvalue" = log2(value/(1 - value))) %>%                 # log2 transform B / (1-B) expression for variance stabilization 
+               group_by(gene) %>%                                             # standardize for cross data set comparison
+               mutate("standardized" = (mvalue - mean(mvalue))/               # center at mean for gene 
+                                         sd(mvalue),                          # scale by sd for gene
+                       ) %>%
+                ungroup() %>%                                                 # ungroup by genes 
+                select(-value, -mvalue) %>%                                           # select all but sd column
+                pivot_wider(names_from = "gene",                              # final format genes as rows
+                            values_from = "standardized")                     # final format expression across accession as columns  
+```
+
+## Dataset for Analysis
+```{r FinalDataset}
+## combine phenotype and expression data for workable data
+gse151067_data <- inner_join(gse151067_pheno, gse151067_meth, 
+                            by = "geo_accession")   # match by accession
+
+## create metatag for dataset
+gse151067_info <-  
+                list(
+                     name = "Vasudeval_H",               # author
+                     accession = "GSE151067",         # dataset accession 
+                     # the following are logical to determine clinical data available for dataset
+                     geo_accession = "geo_accession" %in% colnames(gse151067_pheno),
+                      sample_id = "sample_id" %in% colnames(gse151067_pheno),
+                      age = "age" %in% colnames(gse151067_pheno),
+                      sex = "sex" %in% colnames(gse151067_pheno),
+                      grade = "grade" %in% colnames(gse151067_pheno),
+                      histology = "histology" %in% colnames(gse151067_pheno),
+                      type = "type" %in% colnames(gse151067_pheno),
+                      location = "location" %in% colnames(gse151067_pheno),
+                      mib1_index = "mib1_index" %in% colnames(gse151067_pheno),
+                      recurrence = "recurrence" %in% colnames(gse151067_pheno),
+                      recurrence_yrs = "recurrence_yrs" %in% colnames(gse151067_pheno),
+                      recurrence_freq = "recurrence_freq" %in% colnames(gse151067_pheno),
+                      followup_days = "followup_days" %in% colnames(gse151067_pheno),
+                      survival_yrs = "survival_yrs" %in% colnames(gse151067_pheno),
+                      vital_indicator = "vital_indicator" %in% colnames(gse151067_pheno),
+                      tissue = "tissue" %in% colnames(gse151067_pheno),
+                      progression = "progression" %in% colnames(gse151067_pheno),
+                      radiation = "radiation" %in% colnames(gse151067_pheno),
+                      rna_integrity ="rna_integrity" %in% colnames(gse151067_pheno),
+
+                     sample_numbers = nrow(gse151067_data) # number of samples 
+                     )
+
+## create dataset as list 
+Vasudeval_H_2013 <- list(
+                dataset_info = gse151067_info,             # metatag
+                clinical_data = gse151067_pheno,           # clinical data
+                expression_data = gse151067_meth,           # expression data
+                data = gse151067_data #,                     # combined, workable data
+             #   full_GEO = gse151067                       # full original download from GEO
+)
+```
+
+```{r}
+save(Vasudeval_H_2013, file = here("datasets/methylation","GSE151067_Vasudeval_H.Rda")) 
+```

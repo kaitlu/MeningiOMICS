@@ -19,6 +19,7 @@ pheno_data
 "progression" =     # whether or not the tumor reoccurred or progressed (nr, r, m)
 "radiation" =       # has patient recieved radiation (yes, no, unknown)
 "rna_integrity" =   # rni score (numeric)
+"mutant_type" =     # mutation subtype
 
 expression Data
 "gene" =           # gene name
