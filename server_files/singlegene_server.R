@@ -326,8 +326,10 @@
         
         #### categorical variables
         
-        ### test if more than one level for comparison
-        if (length(unique(datasetInput()[["data"]] %>% pull(grp())) %>% na.omit) > 1) {
+        ### test if more than one level for comparison and groups contain more than 1 observation
+        if (length(unique(datasetInput()[["data"]] %>% pull(grp())) %>% na.omit) > 1 & 
+            all(datasetInput()[["data"]] %>% group_by(!!grp()) %>%  summarize(n_per_group = n()) %>% pull(n_per_group) > 1)
+            ) {
         
         ## leveneTest
         homogen <- leveneTest(variance())
@@ -359,7 +361,7 @@
         } else {
           
         ### for fewer than 2 levels of comparison
-        warning <- data.frame(paste0("The selected dataset, ",input$dataset,", does not have multiple levels of the selected clinical variable, ",input$grouping,", which is required for ANOVA and pairwise analysis of ",input$gene, unit_type(),"."))
+        warning <- data.frame(paste0("The selected dataset, ",input$dataset,", does not have multiple levels of the selected clinical variable, ",input$grouping,", or a level contains a single individual and therefore no variation, which is required for ANOVA and pairwise analysis of ",input$gene, unit_type(),"."))
         names(warning) <- c("Warning")
         rownames(warning) <- c("**")
         warning

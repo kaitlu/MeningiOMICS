@@ -30,7 +30,7 @@ tabPanel(title = "Single Gene Analysis",
                              
                              ## select variable to group by
                              selectizeInput(inputId = "grouping",
-                                            label = "Select variable to analyze",
+                                            label = "Select clinical variable to analyze",
                                             choices = NULL,
                                             options = list(
                                                 placeholder = 'Please select an option below',
@@ -57,7 +57,7 @@ tabPanel(title = "Single Gene Analysis",
                              
                              ## select a gene for pairwise correlation
                              selectizeInput(inputId = "gene2",
-                                            label = "Gene",
+                                            label = "Select another Gene",
                                             choices = NULL,
                                             options = list(
                                                 placeholder = 'Please select an option below',
@@ -132,7 +132,7 @@ tabPanel(title = "Single Gene Analysis",
                             ),
                         
                         ## Pairwise Correlation tab
-                        tabPanel(title = "Pairwise Gene Expression Correlation", 
+                        tabPanel(title = "Pairwise Gene Correlation", 
                                  value = 2,
                                  plotlyOutput("correlation_plot"),
                                  

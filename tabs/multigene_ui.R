@@ -23,7 +23,7 @@ tabPanel(title = "Multigene Analysis",
                                   textInput(inputId = "gene_user_input",
                                             label = "Genes of interest",
                                             value = NULL,
-                                            placeholder = 'Comma, tab, bar, or semicolon seperated list of genes of interest'
+                                            placeholder = 'Comma, tab, bar, or semicolon separated list of genes of interest'
                                   )
                                   
                                   
@@ -33,9 +33,9 @@ tabPanel(title = "Multigene Analysis",
                                   
                                   ## feild for users to paste in selections 
                                   textInput(inputId = "significant_gene_user_input",
-                                            label = "Genes of interest",
+                                            label = "Paste significant genes from Multigene ANOVA here",
                                             value = NULL,
-                                            placeholder = 'Comma, tab, bar, or semicolon seperated list of genes of interest'
+                                            placeholder = 'Comma, tab, bar, or semicolon separated list of genes of interest'
                                   )
                                  
                  ),
@@ -43,7 +43,7 @@ tabPanel(title = "Multigene Analysis",
              
                  ## select clinical variable to group by
                  selectizeInput(inputId = "multi_grouping",
-                                label = "Select variable to analyze",
+                                label = "Select clinical variable to analyze",
                                 choices = NULL,
                                 selected = NULL,
                                 options = list(

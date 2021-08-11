@@ -28,21 +28,21 @@ Explore select publicly available meningioma datasets! Select a tab above to beg
         
   * Analytical Functionality
       + Summary Statistics
-      + ANOVA of expression by clinical variable
+      + ANOVA of omics by clinical variable
       + Tukey’s Honest Significant Difference (test of pairwise differences)
       + Correlation test of association
               
          
   * Visualization Functionality
-      + Visualization of expression by clinical variable boxplot/scatterplot
+      + Visualization of omics data by clinical variable boxplot/scatterplot
       + Pairwise gene correlation plots
 
 ### Multigene Analysis Tab
         
   * Analytical Functionality
-      + Multigene ANOVA of expression by categorical clinical variable
+      + Multigene ANOVA of omics data by categorical clinical variable
   * Visualization Functionality
-      + Heatmap and hierarchical clustering of expression
+      + Heatmap and hierarchical clustering of omics values
         
         
 *****

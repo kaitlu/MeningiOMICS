@@ -178,7 +178,9 @@
          req(input$multi_dataset)
          
          ### test if more than one level for comparison
-         if (length(unique(dui()[["data"]] %>% pull(cvui())) %>% na.omit) > 1) {
+         if (length(unique(dui()[["data"]] %>% pull(cvui())) %>% na.omit) > 1 & 
+             all(dui()[["data"]] %>% group_by(!!cvui()) %>%  summarize(n_per_group = n()) %>% pull(n_per_group) > 1)
+             ) {
             
             multiANOVA <- do.call(rbind,            # lists are fun - do call allows rbind to work 
                                multianova_out()  # bind the gene and anova results
@@ -189,7 +191,7 @@
          } else {
          
          ### for fewer than 2 levels of comparison
-         warning <- data.frame(paste0("The selected dataset, ",input$multi_dataset,", does not have multiple levels of the selected clinical variable, ",input$multi_grouping,", which is required for ANOVA."))
+         warning <- data.frame(paste0("The selected dataset, ",input$multi_dataset,", does not have multiple levels of the selected clinical variable, ",input$multi_grouping,", or a level contains a single individual and therefore no variation, which is required for ANOVA."))
          names(warning) <- c("Warning")
          rownames(warning) <- c("**")
          warning
@@ -211,7 +213,7 @@
       output$multianova_results <- renderDataTable({
          validate(
            need(input$omics_multi != '',  message = "Please select an omics data type"),
-           need(input$gene_user_input != '', message = "Please enter comma seperated genes of interest"),
+           need(input$gene_user_input != '', message = "Please enter a comma seperated list of genes of interest"),
            need(input$multi_grouping != '', message = "Please select a clinical variable."),
            need(input$multi_dataset != '', message = "Please select a dataset")
          )
@@ -305,8 +307,8 @@
       
       #### heatmap
       heatmap <- reactive({ 
-         
-         heatmaply(x = dui()[["data"]] %>% 
+          
+          heatmaply(x = dui()[["data"]] %>% 
                        select(as.character(strsplit(multigene_heatmap_genes(), split =",")[[1]])),
                    RowSideColors = dui()[["data"]] %>% 
                        select(input$multi_grouping),
@@ -321,12 +323,14 @@
                    colorbar_ypos = 0,
                    row_side_palette = Spectral
                    )
+          
          })
       
       output$heatmap <- renderPlotly({
          validate(
              need(input$omics_multi != '',  message = "Please select an omics data type"),
-             need(input$significant_gene_user_input != '',  message = "Please enter comma seperated genes of interest"),
+             need(length(as.character(strsplit(multigene_heatmap_genes(), split =",")[[1]])) > 1,  
+                  message = "Please enter a comma seperated list of genes of interest (at least 2 to cluster!)"),
              need(input$multi_grouping != '', message =   "Please select a clinical variable."),
              need(input$multi_dataset != '', message = "Please select a dataset")
             )
