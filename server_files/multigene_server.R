@@ -213,7 +213,7 @@
       output$multianova_results <- renderDataTable({
          validate(
            need(input$omics_multi != '',  message = "Please select an omics data type"),
-           need(input$gene_user_input != '', message = "Please enter a comma seperated list of genes of interest"),
+           need(input$gene_user_input != '', message = "Please enter a comma separated list of genes of interest"),
            need(input$multi_grouping != '', message = "Please select a clinical variable."),
            need(input$multi_dataset != '', message = "Please select a dataset")
          )
@@ -330,7 +330,7 @@
          validate(
              need(input$omics_multi != '',  message = "Please select an omics data type"),
              need(length(as.character(strsplit(multigene_heatmap_genes(), split =",")[[1]])) > 1,  
-                  message = "Please enter a comma seperated list of genes of interest (at least 2 to cluster!)"),
+                  message = "Please enter a comma separated list of genes of interest (at least 2 to cluster!)"),
              need(input$multi_grouping != '', message =   "Please select a clinical variable."),
              need(input$multi_dataset != '', message = "Please select a dataset")
             )
